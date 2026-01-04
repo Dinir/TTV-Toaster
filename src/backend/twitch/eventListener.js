@@ -28,14 +28,14 @@ class TwitchEventListener {
       // Create API client
       this.apiClient = new ApiClient({ authProvider })
 
-      // Get authenticated user's channel info
-      const users = await this.apiClient.users.getAuthenticatedUser()
-      if (!users) {
-        throw new Error('Could not get authenticated user info')
+      // Get channel info from token file (has userId)
+      const tokenData = await twitchAuth.loadTokens()
+      if (!tokenData || !tokenData.userId) {
+        throw new Error('Could not get user info from token file')
       }
 
-      this.channelId = users.id
-      console.log(`[EventSub] Listening to channel: ${users.displayName} (ID: ${this.channelId})`)
+      this.channelId = tokenData.userId
+      console.log(`[EventSub] Listening to channel: ${tokenData.userDisplayName} (ID: ${this.channelId})`)
 
       // Create WebSocket listener (no public URL needed!)
       this.listener = new EventSubWsListener({ apiClient: this.apiClient })

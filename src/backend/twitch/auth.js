@@ -20,6 +20,11 @@ class TwitchAuth {
    * Initialize auth provider with stored or new tokens
    */
   async initialize () {
+    // Return existing auth provider if already initialized
+    if (this.authProvider) {
+      return this.authProvider
+    }
+
     const clientId = process.env.TWITCH_CLIENT_ID
     const clientSecret = process.env.TWITCH_CLIENT_SECRET
 
@@ -58,6 +63,11 @@ class TwitchAuth {
     })
 
     // Add user with token data
+    // Use scopes from token data if available, otherwise use default scopes
+    const scopes = tokenData.scope || ['channel:read:subscriptions', 'channel:read:redemptions', 'bits:read', 'moderator:read:followers', 'chat:read']
+
+    // Register the user with the auth provider
+    // Use addUserForToken which works better with ChatClient
     await this.authProvider.addUserForToken(tokenData, ['chat'])
 
     // Set up token refresh callback to save new tokens

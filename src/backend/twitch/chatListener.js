@@ -149,13 +149,15 @@ class TwitchChatListener {
       // Initialize auth
       const authProvider = await twitchAuth.initialize()
 
-      // Get channel name
-      const { ApiClient } = require('@twurple/api')
-      const apiClient = new ApiClient({ authProvider })
-      const user = await apiClient.users.getAuthenticatedUser()
-      this.channelName = user.name
+      // Get channel name from token file
+      const tokenData = await twitchAuth.loadTokens()
+      if (!tokenData || !tokenData.userLogin) {
+        throw new Error('Could not get user info from token file')
+      }
 
-      console.log(`[Chat] Connecting to channel: ${user.displayName}`)
+      this.channelName = tokenData.userLogin
+
+      console.log(`[Chat] Connecting to channel: ${tokenData.userDisplayName}`)
 
       // Create chat client
       this.chatClient = new ChatClient({

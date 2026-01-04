@@ -1,5 +1,3 @@
-const { io } = require('./server')
-
 /**
  * Event Bridge - Normalizes Twitch events and emits them to connected clients
  *
@@ -8,8 +6,19 @@ const { io } = require('./server')
  */
 
 class EventBridge {
-  constructor (socketIo) {
-    this.io = socketIo
+  constructor () {
+    this._io = null
+  }
+
+  /**
+   * Get the Socket.io instance (lazy loading to avoid circular dependency)
+   */
+  get io () {
+    if (!this._io) {
+      const { io } = require('./server')
+      this._io = io
+    }
+    return this._io
   }
 
   /**
@@ -124,6 +133,6 @@ class EventBridge {
 }
 
 // Create singleton instance
-const eventBridge = new EventBridge(io)
+const eventBridge = new EventBridge()
 
 module.exports = eventBridge
