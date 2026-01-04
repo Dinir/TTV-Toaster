@@ -101,6 +101,79 @@ document.addEventListener('twitch:redemption', (event) => {
 })
 ```
 
+#### `twitch:chat`
+```javascript
+document.addEventListener('twitch:chat', (event) => {
+  const { displayName, message, color, isMod, isSubscriber, isVip, badges } = event.detail
+  console.log(`${displayName}: ${message}`)
+})
+```
+
+**Note:** Chat messages are filtered by default to prevent spam. See [Chat Filtering](#chat-filtering) below.
+
+## Chat Filtering
+
+To prevent spam in busy channels, chat messages are filtered before being emitted. By default, only messages starting with `!` (commands) are emitted.
+
+### Default Filters
+
+- **Prefix filter**: Only messages starting with `!` pass through
+- **Rate limiting**: Maximum 10 messages per second
+- All other messages are silently ignored
+
+### Configuring Filters
+
+Create a `.chat-filters.json` file in the root directory:
+
+```json
+{
+  "enabled": true,
+  "conditions": {
+    "startsWithPrefix": "!",
+    "mentionsBot": true,
+    "containsKeywords": ["hello", "help"],
+    "fromSpecificUsers": ["someuser", "anotheruser"],
+    "minLength": 5,
+    "maxLength": 500
+  },
+  "rateLimit": {
+    "enabled": true,
+    "maxMessagesPerSecond": 10
+  }
+}
+```
+
+**Filter Options:**
+
+- `startsWithPrefix`: Only emit messages starting with this character (e.g., `"!"` for commands)
+- `mentionsBot`: Emit messages that mention the broadcaster
+- `containsKeywords`: Array of keywords - emit if message contains any
+- `fromSpecificUsers`: Array of usernames - emit all messages from these users
+- `minLength`/`maxLength`: Filter by message length (0 = disabled)
+- `rateLimit.maxMessagesPerSecond`: Maximum messages to emit per second
+
+**How it works:**
+- If **any** condition matches, the message is emitted
+- Rate limiting is applied after filtering
+- Set `enabled: false` to disable all filtering (not recommended for big channels)
+
+### API Endpoints
+
+You can also configure filters programmatically:
+
+```bash
+# Get current filters
+curl http://localhost:3000/api/chat/filters
+
+# Update filters
+curl -X POST http://localhost:3000/api/chat/filters \
+  -H "Content-Type: application/json" \
+  -d '{"conditions": {"startsWithPrefix": "?"}}'
+
+# Reset to defaults
+curl -X POST http://localhost:3000/api/chat/filters/reset
+```
+
 ## Example: Custom Notification
 
 ```html

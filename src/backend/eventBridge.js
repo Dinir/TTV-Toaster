@@ -104,6 +104,23 @@ class EventBridge {
       userInput: redemptionData.userInput || ''
     })
   }
+
+  /**
+   * Handle chat message event
+   * @param {object} chatData - { username, displayName, message, color, isMod, isSubscriber, isVip, badges }
+   */
+  handleChatMessage (chatData) {
+    this.emit('chat', {
+      username: chatData.username,
+      displayName: chatData.displayName || chatData.username,
+      message: chatData.message,
+      color: chatData.color,
+      isMod: chatData.isMod || false,
+      isSubscriber: chatData.isSubscriber || false,
+      isVip: chatData.isVip || false,
+      badges: chatData.badges || {}
+    })
+  }
 }
 
 // Create singleton instance

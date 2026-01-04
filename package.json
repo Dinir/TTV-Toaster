@@ -9,7 +9,15 @@
     "lint:fix": "standard --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["twitch", "stream", "events", "notifications", "obs", "overlay", "developer"],
+  "keywords": [
+    "twitch",
+    "stream",
+    "events",
+    "notifications",
+    "obs",
+    "overlay",
+    "developer"
+  ],
   "author": "",
   "license": "ISC",
   "repository": {
@@ -20,6 +28,7 @@
   "dependencies": {
     "@twurple/api": "^8.0.2",
     "@twurple/auth": "^8.0.2",
+    "@twurple/chat": "^8.0.2",
     "@twurple/eventsub-http": "^8.0.2",
     "@twurple/eventsub-ws": "^8.0.2",
     "dotenv": "^17.2.3",

@@ -1,6 +1,7 @@
 const crypto = require('crypto')
 const fs = require('fs').promises
 const path = require('path')
+const listenerManager = require('../listenerManager')
 
 /**
  * OAuth Authentication Routes
@@ -19,7 +20,8 @@ const SCOPES = [
   'channel:read:subscriptions',
   'channel:read:redemptions',
   'bits:read',
-  'moderator:read:followers'
+  'moderator:read:followers',
+  'chat:read' // For reading chat messages
 ].join(' ')
 
 // Check if we're in proxy mode or self-hosted mode
@@ -45,7 +47,6 @@ function setupAuthRoutes (app) {
     console.warn('[Auth Routes] No OAuth configuration found')
     console.warn('  Option 1 (Easy): Set OAUTH_PROXY_URL in .env')
     console.warn('  Option 2 (Privacy): Set TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET in .env')
-    return
   }
 }
 
@@ -126,6 +127,11 @@ function setupProxyModeRoutes (app, redirectUri) {
       await fs.writeFile(TOKEN_FILE, JSON.stringify(tokensToSave, null, 2))
 
       console.log(`[Auth] Successfully authenticated user: ${data.user.displayName} (${data.user.login})`)
+
+      // Start Twitch listeners
+      listenerManager.start().catch(err => {
+        console.error('[Auth] Failed to start listeners:', err.message)
+      })
 
       res.redirect('/?auth=success')
     } catch (error) {
@@ -214,6 +220,11 @@ function setupSelfHostedRoutes (app, clientId, clientSecret, redirectUri) {
       await fs.writeFile(TOKEN_FILE, JSON.stringify(tokensToSave, null, 2))
 
       console.log(`[Auth] Successfully authenticated user: ${user.display_name} (${user.login})`)
+
+      // Start Twitch listeners
+      listenerManager.start().catch(err => {
+        console.error('[Auth] Failed to start listeners:', err.message)
+      })
 
       res.redirect('/?auth=success')
     } catch (error) {

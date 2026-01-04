@@ -2,6 +2,7 @@ const express = require('express')
 const http = require('http')
 const socketIo = require('socket.io')
 const path = require('path')
+const fs = require('fs')
 require('dotenv').config()
 
 const app = express()
@@ -23,6 +24,10 @@ app.use(express.urlencoded({ extended: true }))
 const { setupAuthRoutes } = require('./routes/auth')
 setupAuthRoutes(app)
 
+// Setup chat filter routes
+const { setupChatFilterRoutes } = require('./routes/chatFilters')
+setupChatFilterRoutes(app)
+
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, '../../public')))
 
@@ -41,28 +46,33 @@ module.exports = { io }
 // Import event bridge after io is exported
 require('./eventBridge')
 
-// Import Twitch event listener
-const eventListener = require('./twitch/eventListener')
+// Import listener manager
+const listenerManager = require('./listenerManager')
 
 // Start server
 server.listen(PORT, async () => {
   console.log(`Twitch Toaster server running on http://localhost:${PORT}`)
-  console.log('Waiting for Twitch events...')
+  console.log('Visit http://localhost:3000 to get started!')
 
-  // Initialize Twitch EventSub listener
-  try {
-    await eventListener.initialize()
-    console.log('Twitch integration ready!')
-  } catch (error) {
-    console.error('Failed to start Twitch listener:', error.message)
-    console.error('Server will run but Twitch events will not be received.')
+  // Check if user is already authenticated
+  const tokensPath = path.join(__dirname, '../../.tokens.json')
+  if (fs.existsSync(tokensPath)) {
+    console.log('Found existing authentication, starting listeners...')
+    try {
+      await listenerManager.start()
+    } catch (error) {
+      console.error('Failed to start listeners:', error.message)
+      console.error('Please re-authenticate at http://localhost:3000')
+    }
+  } else {
+    console.log('No authentication found. Please login at http://localhost:3000')
   }
 })
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('\nShutting down gracefully...')
-  await eventListener.stop()
+  await listenerManager.stop()
   server.close(() => {
     console.log('Server closed')
     process.exit(0)

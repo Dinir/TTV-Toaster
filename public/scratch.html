@@ -121,7 +121,8 @@
   console.log(`${viewerCount} viewers raided from ${displayName}!`)
   // Show your custom notification here!
 })</pre>
-    <p style="margin-top: 15px;">Available events: <code>twitch:raid</code>, <code>twitch:follow</code>, <code>twitch:subscribe</code>, <code>twitch:gift</code>, <code>twitch:cheer</code>, <code>twitch:redemption</code></p>
+    <p style="margin-top: 15px;">Available events: <code>twitch:raid</code>, <code>twitch:follow</code>, <code>twitch:subscribe</code>, <code>twitch:gift</code>, <code>twitch:cheer</code>, <code>twitch:redemption</code>, <code>twitch:chat</code></p>
+    <p style="margin-top: 10px;"><strong>Chat Filtering:</strong> By default, only messages starting with <code>!</code> are emitted to prevent spam. Configure filters at <code>/api/chat/filters</code> or create a <code>.chat-filters.json</code> file.</p>
   </div>
 
   <div id="event-log"></div>
@@ -192,18 +193,28 @@
       addEventToLog('redemption', `${displayName} redeemed: ${rewardTitle}`)
     })
 
+    document.addEventListener('twitch:chat', (event) => {
+      const { displayName, message, color, isMod, isSubscriber } = event.detail
+      const badges = []
+      if (isMod) badges.push('MOD')
+      if (isSubscriber) badges.push('SUB')
+      const badgeStr = badges.length > 0 ? `[${badges.join(',')}] ` : ''
+      addEventToLog('chat', `${badgeStr}${displayName}: ${message}`, color)
+    })
+
     // Helper function to add events to the log (just for demonstration)
-    function addEventToLog (type, message) {
+    function addEventToLog (type, message, color = null) {
       const eventDiv = document.createElement('div')
       eventDiv.className = 'event'
+      const dataEl = `<div class="event-data"${color ? ` style="color: ${color}"` : ''}>${message}</div>`
       eventDiv.innerHTML = `
         <div class="event-type">${type}</div>
-        <div class="event-data">${message}</div>
+        ${dataEl}
       `
       eventLog.insertBefore(eventDiv, eventLog.firstChild)
 
-      // Keep only last 20 events
-      while (eventLog.children.length > 20) {
+      // Keep only last 50 events (increased for chat)
+      while (eventLog.children.length > 50) {
         eventLog.removeChild(eventLog.lastChild)
       }
     }
