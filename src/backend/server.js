@@ -15,6 +15,14 @@ const io = socketIo(server, {
 
 const PORT = process.env.PORT || 3000
 
+// Middleware
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+// Setup OAuth routes
+const { setupAuthRoutes } = require('./routes/auth')
+setupAuthRoutes(app)
+
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, '../../public')))
 

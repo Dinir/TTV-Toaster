@@ -6,6 +6,7 @@ node_modules/
 
 # Token storage
 .tokens.json
+.oauth-state.json
 
 # IDE
 .idea/

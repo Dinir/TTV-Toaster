@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Twitch Toaster - Setup</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .status {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    .login-section, .authenticated-section {
+      display: none;
+    }
+
+    .twitch-button {
+      background: #9146FF;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .twitch-button:hover {
+      background: #7c2ddc;
+    }
+
+    .twitch-button:active {
+      transform: scale(0.98);
+    }
+
+    .user-info {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .user-info h3 {
+      color: #333;
+      margin-bottom: 5px;
+      font-size: 18px;
+    }
+
+    .user-info p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .link-box {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    .link-box h4 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .link-box a {
+      color: #9146FF;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .link-box a:hover {
+      text-decoration: underline;
+    }
+
+    .logout-button {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    .logout-button:hover {
+      background: #c82333;
+    }
+
+    .loader {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Twitch Toaster</h1>
+    <p class="subtitle">Stream event notifications for developers</p>
+
+    <div id="status" class="status"></div>
+
+    <div id="loginSection" class="login-section">
+      <p style="margin-bottom: 20px; color: #666;">Connect your Twitch account to start receiving stream events.</p>
+      <a href="/auth/twitch" class="twitch-button">
+        <svg width="20" height="20" viewBox="0 0 256 268" fill="currentColor">
+          <path d="M17.458 0L0 46.556v186.201h63.983v34.934h34.931l34.898-34.934h52.36L256 162.954V0H17.458zm23.259 23.263H232.73v128.029l-40.739 40.741H128L93.113 226.92v-34.886H40.717V23.263zm64.008 116.405H128V69.844h-23.275v69.824zm63.997 0h23.27V69.844h-23.27v69.824z"/>
+        </svg>
+        Login with Twitch
+      </a>
+      <div class="link-box">
+        <h4>Need help getting started?</h4>
+        <p style="font-size: 13px; color: #666; margin-top: 5px;">
+          First time? You'll need to create a Twitch app at
+          <a href="https://dev.twitch.tv/console/apps" target="_blank">dev.twitch.tv/console/apps</a>
+          and add your Client ID and Secret to the .env file.
+        </p>
+      </div>
+    </div>
+
+    <div id="authenticatedSection" class="authenticated-section">
+      <div class="user-info">
+        <h3 id="userDisplayName">Loading...</h3>
+        <p id="userLogin">@loading</p>
+      </div>
+
+      <div class="status success" style="display: block;">
+        Connected! Events are now being monitored.
+      </div>
+
+      <div class="link-box">
+        <h4>Ready to go!</h4>
+        <p style="font-size: 13px; color: #666; margin-top: 5px;">
+          Open the <a href="/scratch.html">scratch page</a> to start building your event display.
+        </p>
+      </div>
+
+      <button class="logout-button" onclick="logout()">Disconnect</button>
+    </div>
+  </div>
+
+  <script>
+    const statusDiv = document.getElementById('status')
+    const loginSection = document.getElementById('loginSection')
+    const authenticatedSection = document.getElementById('authenticatedSection')
+
+    function showStatus (message, type) {
+      statusDiv.textContent = message
+      statusDiv.className = `status ${type}`
+      statusDiv.style.display = 'block'
+      setTimeout(() => {
+        statusDiv.style.display = 'none'
+      }, 5000)
+    }
+
+    async function checkAuthStatus () {
+      try {
+        const response = await fetch('/auth/status')
+        const data = await response.json()
+
+        if (data.authenticated) {
+          document.getElementById('userDisplayName').textContent = data.user.displayName
+          document.getElementById('userLogin').textContent = `@${data.user.login}`
+          authenticatedSection.style.display = 'block'
+          loginSection.style.display = 'none'
+        } else {
+          authenticatedSection.style.display = 'none'
+          loginSection.style.display = 'block'
+        }
+      } catch (error) {
+        console.error('Failed to check auth status:', error)
+        loginSection.style.display = 'block'
+      }
+    }
+
+    async function logout () {
+      if (!confirm('Are you sure you want to disconnect?')) return
+
+      try {
+        await fetch('/auth/logout', { method: 'POST' })
+        showStatus('Disconnected successfully', 'success')
+        setTimeout(() => {
+          window.location.reload()
+        }, 1000)
+      } catch (error) {
+        showStatus('Failed to disconnect', 'error')
+      }
+    }
+
+    // Check URL params for auth success
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('auth') === 'success') {
+      showStatus('Successfully authenticated with Twitch!', 'success')
+      // Clean URL
+      window.history.replaceState({}, document.title, '/')
+    }
+
+    // Check auth status on load
+    checkAuthStatus()
+  </script>
+</body>
+</html>

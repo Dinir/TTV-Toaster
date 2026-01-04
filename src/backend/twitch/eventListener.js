@@ -28,19 +28,14 @@ class TwitchEventListener {
       // Create API client
       this.apiClient = new ApiClient({ authProvider })
 
-      // Get channel ID from channel name
-      const channelName = process.env.TWITCH_CHANNEL_NAME
-      if (!channelName) {
-        throw new Error('TWITCH_CHANNEL_NAME not set in environment variables')
+      // Get authenticated user's channel info
+      const users = await this.apiClient.users.getAuthenticatedUser()
+      if (!users) {
+        throw new Error('Could not get authenticated user info')
       }
 
-      const user = await this.apiClient.users.getUserByName(channelName)
-      if (!user) {
-        throw new Error(`Channel '${channelName}' not found`)
-      }
-
-      this.channelId = user.id
-      console.log(`[EventSub] Listening to channel: ${user.displayName} (ID: ${this.channelId})`)
+      this.channelId = users.id
+      console.log(`[EventSub] Listening to channel: ${users.displayName} (ID: ${this.channelId})`)
 
       // Create WebSocket listener (no public URL needed!)
       this.listener = new EventSubWsListener({ apiClient: this.apiClient })

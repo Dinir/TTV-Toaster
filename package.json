@@ -1,17 +1,21 @@
 {
   "name": "twitch-toaster",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Developer-friendly tool for receiving Twitch stream events in a scratch page environment",
+  "main": "src/backend/server.js",
   "scripts": {
     "start": "node src/backend/server.js",
     "lint": "standard",
     "lint:fix": "standard --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["twitch", "stream", "events", "notifications", "obs", "overlay", "developer"],
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/twitch-toaster"
+  },
   "type": "commonjs",
   "dependencies": {
     "@twurple/api": "^8.0.2",
