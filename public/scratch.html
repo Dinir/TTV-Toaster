@@ -117,11 +117,13 @@
     <h3>How to use this page:</h3>
     <p>This page automatically receives Twitch events and dispatches them as DOM events. Listen for them like this:</p>
     <pre>document.addEventListener('twitch:raid', (event) => {
-  const { displayName, viewerCount } = event.detail
+  const { displayName, viewerCount, gameName, title } = event.detail
   console.log(`${viewerCount} viewers raided from ${displayName}!`)
+  console.log(`They were streaming: ${gameName}`)
   // Show your custom notification here!
 })</pre>
     <p style="margin-top: 15px;">Available events: <code>twitch:raid</code>, <code>twitch:follow</code>, <code>twitch:subscribe</code>, <code>twitch:gift</code>, <code>twitch:cheer</code>, <code>twitch:redemption</code>, <code>twitch:chat</code></p>
+    <p style="margin-top: 10px;">Each event includes rich data like profile images, broadcaster status, game/category info, reward costs, and more. Open your browser console and check <code>event.detail</code> to see all available properties!</p>
     <p style="margin-top: 10px;"><strong>Chat Filtering:</strong> By default, only messages starting with <code>!</code> are emitted to prevent spam. Configure filters at <code>/api/chat/filters</code> or create a <code>.chat-filters.json</code> file.</p>
   </div>
 
@@ -163,8 +165,10 @@
 
     // Example event listeners (user can customize these!)
     document.addEventListener('twitch:raid', (event) => {
-      const { displayName, viewerCount } = event.detail
-      addEventToLog('raid', `${viewerCount} viewers raided from ${displayName}!`)
+      const { displayName, viewerCount, gameName, broadcasterType, profileImageUrl } = event.detail
+      const partnerBadge = broadcasterType === 'partner' ? '✓ ' : ''
+      const gameInfo = gameName && gameName !== 'Unknown' ? ` (was streaming ${gameName})` : ''
+      addEventToLog('raid', `${partnerBadge}${displayName} raided with ${viewerCount} viewers!${gameInfo}`)
     })
 
     document.addEventListener('twitch:follow', (event) => {
@@ -189,8 +193,9 @@
     })
 
     document.addEventListener('twitch:redemption', (event) => {
-      const { displayName, rewardTitle } = event.detail
-      addEventToLog('redemption', `${displayName} redeemed: ${rewardTitle}`)
+      const { displayName, rewardTitle, rewardCost, userInput } = event.detail
+      const inputText = userInput ? ` - "${userInput}"` : ''
+      addEventToLog('redemption', `${displayName} redeemed: ${rewardTitle} (${rewardCost} points)${inputText}`)
     })
 
     document.addEventListener('twitch:chat', (event) => {
