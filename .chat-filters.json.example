@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "conditions": {
+    "startsWithPrefix": "!",
+    "mentionsBot": false,
+    "containsKeywords": [],
+    "fromSpecificUsers": [],
+    "minLength": 0,
+    "maxLength": 0
+  },
+  "rateLimit": {
+    "enabled": true,
+    "maxMessagesPerSecond": 10
+  }
+}
