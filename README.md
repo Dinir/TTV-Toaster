@@ -12,51 +12,39 @@ A developer-friendly tool for receiving Twitch stream events in a scratch page e
 
 ## Quick Start
 
-### 1. Download and Setup
+Twitch Toaster supports two modes - choose the one that fits your needs:
+
+### Option 1: Easy Mode (Recommended)
+
+No Twitch app creation required - uses our hosted OAuth proxy.
 
 1. Download this project
 2. Copy `.env.example` to `.env`
-3. Add your Twitch app credentials (see below)
+3. Uncomment the `OAUTH_PROXY_URL` line in `.env`
+4. Run `npm install` and `npm start`
+5. Login and you're done!
 
-### 2. Get Twitch App Credentials
+**Note**: In Easy Mode, your tokens are still stored locally on your computer. The proxy only handles the OAuth exchange.
 
-1. Go to https://dev.twitch.tv/console/apps
-2. Click "Register Your Application"
-3. Fill in:
+### Option 2: Self-Hosted Mode (Maximum Privacy)
+
+Your own Twitch app - tokens never leave your computer.
+
+1. Download this project
+2. Create a Twitch app at https://dev.twitch.tv/console/apps
    - **Name**: Twitch Toaster (or whatever you want)
    - **OAuth Redirect URLs**: `http://localhost:3000/auth/callback`
    - **Category**: Choose any (e.g., "Application Integration")
-4. Click "Create"
-5. Copy your **Client ID** and **Client Secret** to `.env`
+3. Copy `.env.example` to `.env`
+4. Add your **Client ID** and **Client Secret** to `.env`
+5. Run `npm install` and `npm start`
+6. Login and you're done!
 
-### 3. Run the App
+**Privacy**: Your Client Secret stays on your computer. No data is sent to any third party.
 
-**Windows:**
-```bash
-# Double-click start.bat
-# OR
-npm start
-```
+---
 
-**Mac/Linux:**
-```bash
-chmod +x start.sh
-./start.sh
-# OR
-npm start
-```
-
-The browser will open automatically to `http://localhost:3000`
-
-### 4. Login with Twitch
-
-1. Click "Login with Twitch"
-2. Authorize the app
-3. You're done! Events will start flowing
-
-### 5. Build Your Display
-
-Open `http://localhost:3000/scratch.html` and start coding!
+Both modes store tokens locally in `.tokens.json` - they never leave your machine!
 
 ## Scratch Page API
 
@@ -212,12 +200,43 @@ npm run lint
 npm run lint:fix
 ```
 
+## Deploying Your Own OAuth Proxy (Optional)
+
+If you want to provide Easy Mode to others but don't trust our hosted proxy, you can deploy your own:
+
+### Deploy to Railway
+
+1. Go to [Railway](https://railway.app)
+2. Create new project from the `oauth-proxy/` folder
+3. Add environment variables:
+   - `TWITCH_CLIENT_ID`
+   - `TWITCH_CLIENT_SECRET`
+4. Deploy and copy the URL
+5. Share that URL with users (they add it as `OAUTH_PROXY_URL` in their `.env`)
+
+### Deploy to Render
+
+1. Go to [Render](https://render.com)
+2. Create new Web Service
+3. Set root directory to `oauth-proxy`
+4. Add environment variables
+5. Deploy
+
+The OAuth proxy is a tiny Express server that only exposes `/exchange` and `/refresh` endpoints. The Client Secret stays secure on your server.
+
 ## Privacy & Security
 
+### Self-Hosted Mode
 - All tokens are stored **locally** on your computer (`.tokens.json`)
-- Tokens are **never** sent to any third-party server
+- Your Client Secret **never** leaves your computer
 - The app only connects to **Twitch's official API**
 - Your `.tokens.json` is in `.gitignore` - never committed to git
+
+### Easy Mode (with OAuth Proxy)
+- Tokens are still stored **locally** on your computer (`.tokens.json`)
+- The proxy only handles OAuth code exchange (one-time operation)
+- After login, all communication goes directly to **Twitch's official API**
+- The proxy never stores or logs your tokens
 
 ## License
 
