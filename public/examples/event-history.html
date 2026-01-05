@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event History - TTV Toaster</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #9146FF;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #9146FF;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      background: #9146FF;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: #7c2ddc;
+      transform: translateY(-1px);
+    }
+
+    button.secondary {
+      background: #444;
+    }
+
+    button.secondary:hover {
+      background: #555;
+    }
+
+    button.danger {
+      background: #dc3545;
+    }
+
+    button.danger:hover {
+      background: #c82333;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: #16213e;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #9146FF;
+    }
+
+    .stat-card h3 {
+      font-size: 14px;
+      color: #aaa;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: bold;
+      color: #9146FF;
+    }
+
+    .filters {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: #16213e;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .filter-btn.active {
+      background: #9146FF;
+    }
+
+    .events-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .event-item {
+      background: #16213e;
+      padding: 15px 20px;
+      border-radius: 8px;
+      border-left: 4px solid #555;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      transition: all 0.2s;
+    }
+
+    .event-item:hover {
+      background: #1e2b4a;
+      transform: translateX(4px);
+    }
+
+    .event-item.raid { border-left-color: #ff6b6b; }
+    .event-item.follow { border-left-color: #4ecdc4; }
+    .event-item.subscribe { border-left-color: #9146FF; }
+    .event-item.gift { border-left-color: #ffd93d; }
+    .event-item.cheer { border-left-color: #6bcf7f; }
+    .event-item.redemption { border-left-color: #f39c12; }
+    .event-item.chat { border-left-color: #95a5a6; }
+
+    .event-info {
+      flex: 1;
+    }
+
+    .event-type {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .event-type.raid { background: #ff6b6b; }
+    .event-type.follow { background: #4ecdc4; }
+    .event-type.subscribe { background: #9146FF; }
+    .event-type.gift { background: #ffd93d; color: #333; }
+    .event-type.cheer { background: #6bcf7f; }
+    .event-type.redemption { background: #f39c12; }
+    .event-type.chat { background: #95a5a6; }
+
+    .event-details {
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+
+    .event-meta {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .event-time {
+      font-size: 12px;
+      color: #666;
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+
+    .empty-state h2 {
+      margin-bottom: 10px;
+      color: #888;
+    }
+
+    .replay-btn {
+      background: #28a745;
+      padding: 6px 12px;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+
+    .replay-btn:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Event History</h1>
+      <div class="controls">
+        <button onclick="loadHistory()">Refresh</button>
+        <button class="danger" onclick="clearHistory()">Clear All</button>
+      </div>
+    </header>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-type="all" onclick="filterEvents('all')">All</button>
+      <button class="filter-btn" data-type="raid" onclick="filterEvents('raid')">Raids</button>
+      <button class="filter-btn" data-type="follow" onclick="filterEvents('follow')">Follows</button>
+      <button class="filter-btn" data-type="subscribe" onclick="filterEvents('subscribe')">Subs</button>
+      <button class="filter-btn" data-type="gift" onclick="filterEvents('gift')">Gifts</button>
+      <button class="filter-btn" data-type="cheer" onclick="filterEvents('cheer')">Cheers</button>
+      <button class="filter-btn" data-type="redemption" onclick="filterEvents('redemption')">Redemptions</button>
+      <button class="filter-btn" data-type="chat" onclick="filterEvents('chat')">Chat</button>
+    </div>
+
+    <div class="events-list" id="eventsList"></div>
+  </div>
+
+  <script>
+    let allEvents = []
+    let currentFilter = 'all'
+
+    async function loadHistory () {
+      try {
+        const [eventsRes, statsRes] = await Promise.all([
+          fetch('/api/events'),
+          fetch('/api/events-stats')
+        ])
+
+        const eventsData = await eventsRes.json()
+        const statsData = await statsRes.json()
+
+        allEvents = eventsData.events
+        renderStats(statsData)
+        renderEvents()
+      } catch (error) {
+        console.error('Failed to load history:', error)
+      }
+    }
+
+    function renderStats (stats) {
+      const statsEl = document.getElementById('stats')
+      statsEl.innerHTML = `
+        <div class="stat-card">
+          <h3>Total Events</h3>
+          <div class="value">${stats.total}</div>
+        </div>
+        ${Object.entries(stats.byType).map(([type, count]) => `
+          <div class="stat-card">
+            <h3>${type}</h3>
+            <div class="value">${count}</div>
+          </div>
+        `).join('')}
+      `
+    }
+
+    function renderEvents () {
+      const eventsListEl = document.getElementById('eventsList')
+      const filteredEvents = currentFilter === 'all'
+        ? allEvents
+        : allEvents.filter(e => e.type === currentFilter)
+
+      if (filteredEvents.length === 0) {
+        eventsListEl.innerHTML = `
+          <div class="empty-state">
+            <h2>No events yet</h2>
+            <p>Events will appear here as they happen. Try triggering some test events!</p>
+          </div>
+        `
+        return
+      }
+
+      eventsListEl.innerHTML = filteredEvents.map(event => {
+        const details = formatEventDetails(event)
+        const timeAgo = getTimeAgo(event.timestamp)
+
+        return `
+          <div class="event-item ${event.type}">
+            <div class="event-info">
+              <span class="event-type ${event.type}">${event.type}</span>
+              <div class="event-details">${details}</div>
+              <div class="event-meta">${formatEventMeta(event)}</div>
+            </div>
+            <div class="event-time">${timeAgo}</div>
+          </div>
+        `
+      }).join('')
+    }
+
+    function formatEventDetails (event) {
+      const d = event.data
+      switch (event.type) {
+        case 'raid':
+          return `<strong>${d.displayName}</strong> raided with <strong>${d.viewerCount}</strong> viewers`
+        case 'follow':
+          return `<strong>${d.displayName}</strong> followed`
+        case 'subscribe':
+          return `<strong>${d.displayName}</strong> subscribed (Tier ${d.tier.charAt(0)})`
+        case 'gift':
+          return `<strong>${d.displayName}</strong> gifted <strong>${d.amount}</strong> subs`
+        case 'cheer':
+          return `<strong>${d.displayName}</strong> cheered <strong>${d.bits}</strong> bits`
+        case 'redemption':
+          return `<strong>${d.displayName}</strong> redeemed <strong>${d.rewardTitle}</strong>`
+        case 'chat':
+          return `<strong>${d.displayName}</strong>: ${d.message}`
+        default:
+          return JSON.stringify(d)
+      }
+    }
+
+    function formatEventMeta (event) {
+      const d = event.data
+      const meta = []
+
+      if (d.gameName) meta.push(`Playing: ${d.gameName}`)
+      if (d.broadcasterType) meta.push(`Type: ${d.broadcasterType}`)
+      if (d.cumulativeAmount) meta.push(`Total this session: ${d.cumulativeAmount}`)
+      if (d.rewardCost) meta.push(`Cost: ${d.rewardCost} points`)
+      if (d.isMod) meta.push('Moderator')
+      if (d.isSubscriber) meta.push('Subscriber')
+
+      return meta.join(' • ') || 'No additional info'
+    }
+
+    function getTimeAgo (timestamp) {
+      const seconds = Math.floor((Date.now() - timestamp) / 1000)
+      if (seconds < 60) return `${seconds}s ago`
+      const minutes = Math.floor(seconds / 60)
+      if (minutes < 60) return `${minutes}m ago`
+      const hours = Math.floor(minutes / 60)
+      if (hours < 24) return `${hours}h ago`
+      const days = Math.floor(hours / 24)
+      return `${days}d ago`
+    }
+
+    function filterEvents (type) {
+      currentFilter = type
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.type === type)
+      })
+      renderEvents()
+    }
+
+    async function clearHistory () {
+      if (!confirm('Are you sure you want to clear all event history?')) return
+
+      try {
+        await fetch('/api/events/clear', { method: 'POST' })
+        allEvents = []
+        renderStats({ total: 0, byType: {} })
+        renderEvents()
+      } catch (error) {
+        console.error('Failed to clear history:', error)
+      }
+    }
+
+    // Auto-refresh every 5 seconds
+    setInterval(loadHistory, 5000)
+
+    // Initial load
+    loadHistory()
+  </script>
+</body>
+</html>

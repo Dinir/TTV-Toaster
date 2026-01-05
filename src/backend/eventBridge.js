@@ -5,6 +5,8 @@
  * format, and broadcasts them to all connected scratch pages via Socket.io
  */
 
+const eventHistory = require('./eventHistory')
+
 class EventBridge {
   constructor () {
     this._io = null
@@ -34,6 +36,9 @@ class EventBridge {
     }
 
     console.log(`[EventBridge] Emitting event: twitch:${eventType}`, normalizedEvent.data)
+
+    // Add to event history
+    eventHistory.add(eventType, eventData)
 
     // Emit to all connected clients
     this.io.emit('twitch-event', normalizedEvent)

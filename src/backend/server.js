@@ -32,6 +32,10 @@ setupChatFilterRoutes(app)
 const { setupTestEventRoutes } = require('./routes/testEvents')
 setupTestEventRoutes(app)
 
+// Setup event history routes
+const { setupEventHistoryRoutes } = require('./routes/eventHistory')
+setupEventHistoryRoutes(app)
+
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, '../../public')))
 
