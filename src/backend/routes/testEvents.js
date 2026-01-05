@@ -82,11 +82,21 @@ function setupTestEventRoutes (app) {
       })
     }
 
-    // Send test event through event bridge
-    eventBridge.handleEvent({
-      type: eventType,
-      data: mockEvent
-    })
+    // Send test event through the appropriate event bridge handler
+    const handlerMap = {
+      raid: 'handleRaid',
+      follow: 'handleFollow',
+      subscribe: 'handleSubscribe',
+      gift: 'handleGift',
+      cheer: 'handleCheer',
+      redemption: 'handleRedemption',
+      chat: 'handleChatMessage'
+    }
+
+    const handlerMethod = handlerMap[eventType]
+    if (handlerMethod && typeof eventBridge[handlerMethod] === 'function') {
+      eventBridge[handlerMethod](mockEvent)
+    }
 
     res.json({
       success: true,
