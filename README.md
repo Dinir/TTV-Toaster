@@ -87,10 +87,15 @@ npm install
 
 ### 3. Test Events
 
-Once authenticated, open `http://localhost:3000/scratch.html` to see events in real-time. Test by:
-- Following your own channel from another account
-- Sending chat messages starting with `!` (default filter)
-- Triggering other events on your stream
+**Easy Testing** - Use the built-in test page:
+- Open `http://localhost:3000/test.html`
+- Click buttons to trigger mock events (no real Twitch events needed!)
+- Perfect for testing your custom displays and styling
+
+**Real Events** - Test with actual Twitch events:
+- Follow your own channel from another account
+- Send chat messages starting with `!` (default filter)
+- Trigger other events on your live stream
 
 ### 4. Add to OBS
 

@@ -28,6 +28,10 @@ setupAuthRoutes(app)
 const { setupChatFilterRoutes } = require('./routes/chatFilters')
 setupChatFilterRoutes(app)
 
+// Setup test event routes
+const { setupTestEventRoutes } = require('./routes/testEvents')
+setupTestEventRoutes(app)
+
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, '../../public')))
 
