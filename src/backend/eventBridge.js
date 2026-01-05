@@ -76,7 +76,7 @@ class EventBridge {
 
   /**
    * Handle gift subscription event
-   * @param {object} giftData - { username, displayName, amount, tier, isAnonymous }
+   * @param {object} giftData - { username, displayName, amount, tier, isAnonymous, cumulativeAmount, profileImageUrl }
    */
   handleGift (giftData) {
     this.emit('gift', {
@@ -84,7 +84,9 @@ class EventBridge {
       displayName: giftData.displayName || giftData.username,
       amount: giftData.amount,
       tier: giftData.tier || '1000',
-      isAnonymous: giftData.isAnonymous || false
+      isAnonymous: giftData.isAnonymous || false,
+      cumulativeAmount: giftData.cumulativeAmount,
+      profileImageUrl: giftData.profileImageUrl
     })
   }
 
@@ -103,14 +105,18 @@ class EventBridge {
 
   /**
    * Handle channel points redemption event
-   * @param {object} redemptionData - { username, displayName, rewardTitle, userInput }
+   * @param {object} redemptionData - { username, displayName, rewardTitle, rewardCost, rewardPrompt, userInput, profileImageUrl, redeemedAt }
    */
   handleRedemption (redemptionData) {
     this.emit('redemption', {
       username: redemptionData.username,
       displayName: redemptionData.displayName || redemptionData.username,
       rewardTitle: redemptionData.rewardTitle,
-      userInput: redemptionData.userInput || ''
+      rewardCost: redemptionData.rewardCost,
+      rewardPrompt: redemptionData.rewardPrompt,
+      userInput: redemptionData.userInput || '',
+      profileImageUrl: redemptionData.profileImageUrl,
+      redeemedAt: redemptionData.redeemedAt
     })
   }
 
