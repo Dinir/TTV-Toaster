@@ -379,9 +379,6 @@
         <p id="userLogin">@loading</p>
       </div>
 
-      <div class="status success" style="display: block;">
-        ✓ Connected! Events are now being monitored.
-      </div>
 
       <a href="/scratch.html" target="_blank" class="primary-button">
         🚀 Open Scratch Page
@@ -480,6 +477,11 @@
           document.getElementById('userLogin').textContent = `@${data.user.login}`
           authenticatedSection.style.display = 'block'
           loginSection.style.display = 'none'
+
+          // Show toast notification for connected status
+          setTimeout(() => {
+            showToast('Connected! Events are now being monitored.', 'success')
+          }, 100)
         } else {
           authenticatedSection.style.display = 'none'
           loginSection.style.display = 'block'
@@ -521,7 +523,7 @@
     // Check URL params for auth success
     const urlParams = new URLSearchParams(window.location.search)
     if (urlParams.get('auth') === 'success') {
-      showStatus('Successfully authenticated with Twitch!', 'success')
+      showToast('Successfully authenticated with Twitch!', 'success')
       // Clean URL
       window.history.replaceState({}, document.title, '/')
     }
