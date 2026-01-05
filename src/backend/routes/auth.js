@@ -240,6 +240,13 @@ function setupSelfHostedRoutes (app, clientId, clientSecret, redirectUri) {
  * Setup routes common to both modes
  */
 function setupCommonRoutes (app) {
+  app.get('/auth/mode', (req, res) => {
+    res.json({
+      mode: isProxyMode ? 'proxy' : isSelfHosted ? 'self-hosted' : 'unconfigured',
+      proxyUrl: isProxyMode ? OAUTH_PROXY_URL : null
+    })
+  })
+
   app.get('/auth/status', async (req, res) => {
     try {
       const tokenData = await fs.readFile(TOKEN_FILE, 'utf8').then(JSON.parse).catch(() => null)

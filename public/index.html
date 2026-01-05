@@ -363,7 +363,7 @@
         </svg>
         Login with Twitch
       </a>
-      <div class="link-box">
+      <div id="helpBox" class="link-box">
         <h4>Need help getting started?</h4>
         <p style="font-size: 13px; color: #666; margin-top: 5px;">
           First time? You'll need to create a Twitch app at
@@ -467,6 +467,21 @@
       }, 3000)
     }
 
+    async function checkOAuthMode () {
+      try {
+        const response = await fetch('/auth/mode')
+        const data = await response.json()
+
+        // Hide help text if using OAuth proxy
+        const helpBox = document.getElementById('helpBox')
+        if (helpBox) {
+          helpBox.style.display = data.mode === 'self-hosted' ? 'block' : 'none'
+        }
+      } catch (error) {
+        console.error('Failed to check OAuth mode:', error)
+      }
+    }
+
     async function checkAuthStatus () {
       try {
         const response = await fetch('/auth/status')
@@ -528,7 +543,8 @@
       window.history.replaceState({}, document.title, '/')
     }
 
-    // Check auth status on load
+    // Check OAuth mode and auth status on load
+    checkOAuthMode()
     checkAuthStatus()
   </script>
 </body>
