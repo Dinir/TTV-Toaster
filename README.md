@@ -9,6 +9,8 @@ A developer-friendly playground for building custom Twitch event displays. Self-
 - **Two Setup Modes**:
   - **Easy Mode** - OAuth handled by hosted proxy (just download and run)
   - **Self-Hosted Mode** - Create your own Twitch app for maximum privacy
+- **Event History** - View past 50 events with statistics and filters
+- **Mock Event Testing** - Test your overlays without needing real Twitch events
 - **Privacy-First** - Tokens stored locally in `.tokens.json`, never leave your computer (except during OAuth exchange in Easy Mode)
 - **OBS Browser Source Ready** - Use `scratch.html` directly in OBS to display custom notifications
 - **Developer-Friendly** - Built for creative coders who want full control over their stream overlays
@@ -87,10 +89,10 @@ npm install
 
 ### 3. Test Events
 
-**Easy Testing** - Use the built-in test page:
-- Open `http://localhost:3000/test.html`
-- Click buttons to trigger mock events (no real Twitch events needed!)
+After logging in, the main page provides test buttons for all event types:
+- Click any test button to trigger mock events (no real Twitch events needed!)
 - Perfect for testing your custom displays and styling
+- All test events are recorded in event history
 
 **Real Events** - Test with actual Twitch events:
 - Follow your own channel from another account
@@ -104,6 +106,8 @@ npm install
 3. Set Width/Height to your canvas size (e.g., 1920x1080)
 4. Check "Shutdown source when not visible" for better performance
 5. Customize `scratch.html` to create your own designs!
+
+**For detailed OBS setup, see [OBS_GUIDE.md](./OBS_GUIDE.md)**
 
 ## Event Data Reference
 
@@ -140,7 +144,15 @@ document.addEventListener('twitch:raid', (event) => {
 
 See [EVENT_DATA.md](./EVENT_DATA.md) for complete examples and tips.
 
-## Chat Filtering
+## API Endpoints
+
+### Event History
+- `GET /api/events` - Get all events (optional `?limit=50` parameter)
+- `GET /api/events/:type` - Get events by type (raid, follow, subscribe, etc.)
+- `GET /api/events-stats` - Get event statistics
+- `POST /api/events/clear` - Clear all event history
+
+### Chat Filtering
 
 By default, only chat messages starting with `!` are sent to `scratch.html` to prevent spam. Configure filters in `.chat-filters.json` or via the API:
 
@@ -155,6 +167,9 @@ By default, only chat messages starting with `!` are sent to `scratch.html` to p
 **API Endpoints:**
 - `GET /api/chat/filters` - Get current filters
 - `POST /api/chat/filters` - Update filters
+
+### Test Events
+- `POST /api/test/:eventType` - Trigger a mock event (raid, follow, subscribe, gift, cheer, redemption, chat)
 
 ## Project Structure
 
@@ -182,6 +197,12 @@ ttv-toaster/
 
 Check out the `/examples` directory for ready-to-use templates:
 
+### 📜 Event History (`/examples/event-history.html`)
+- View past 50 events with statistics
+- Filter by event type
+- Auto-refreshes every 5 seconds
+- Perfect for reviewing stream highlights
+
 ### 📋 Event Log (`/examples/event-log.html`)
 - Shows all events with profile pictures
 - Partner/affiliate badges
@@ -198,7 +219,7 @@ Check out the `/examples` directory for ready-to-use templates:
 - Queue system for multiple events
 - Works with all event types
 
-**Try them:** Open `http://localhost:3000/examples/` in your browser or add to OBS as a Browser Source!
+**Try them:** Links available on the main page after logging in, or add to OBS as a Browser Source!
 
 ## Customizing Your Display
 
@@ -316,6 +337,7 @@ Built with [Twurple](https://twurple.js.org/) - The powerful Twitch API library 
 ## Support
 
 - [GitHub Issues](https://github.com/dinir/ttv-toaster/issues) - Bug reports and feature requests
+- [OBS_GUIDE.md](./OBS_GUIDE.md) - OBS integration guide
 - [EVENT_DATA.md](./EVENT_DATA.md) - Complete event data reference
 - [Twurple Documentation](https://twurple.js.org/) - API library docs
 - [Twitch EventSub Reference](https://dev.twitch.tv/docs/eventsub/) - Official Twitch docs
