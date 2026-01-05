@@ -1,324 +1,297 @@
 # TTV Toaster
 
-A developer-friendly tool for receiving Twitch stream events in a scratch page environment. Perfect for building custom stream notifications, overlays, and interactive displays.
+A developer-friendly playground for building custom Twitch event displays. Self-hosted Node.js app that receives Twitch events (raids, follows, subs, gifts, cheers, redemptions, chat) via EventSub WebSocket and delivers them to a customizable `scratch.html` page for use in OBS Browser Sources.
 
 ## Features
 
-- **Easy OAuth Login** - No manual token generation needed
-- **Real-time Events** - Receive raids, follows, subs, bits, and more instantly
-- **Developer-Friendly** - Simple `document.addEventListener` API
-- **Privacy-First** - All tokens stored locally on your machine
-- **Zero Configuration** - Just double-click and go
+- **Real-time Twitch Events** - Raids, follows, subs, gift subs, cheers, channel point redemptions, and chat
+- **Rich Event Data** - Profile images, broadcaster types (partner/affiliate), account ages, stream info, and more
+- **Two Setup Modes**:
+  - **Easy Mode** - OAuth handled by hosted proxy (just download and run)
+  - **Self-Hosted Mode** - Create your own Twitch app for maximum privacy
+- **Privacy-First** - Tokens stored locally in `.tokens.json`, never leave your computer (except during OAuth exchange in Easy Mode)
+- **OBS Browser Source Ready** - Use `scratch.html` directly in OBS to display custom notifications
+- **Developer-Friendly** - Built for creative coders who want full control over their stream overlays
+
+## Tech Stack
+
+- **Backend**: Node.js, Express, Socket.io, [@twurple](https://twurple.js.org/) (auth, api, eventsub-ws, chat)
+- **Frontend**: Vanilla JavaScript, CustomEvent API for event dispatching
+- **Code Style**: JavaScript Standard (no semicolons, single quotes)
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or higher recommended)
+- A Twitch account
+- Basic terminal/command line knowledge
 
 ## Quick Start
 
-TTV Toaster supports two modes - choose the one that fits your needs:
+### 1. Download and Install
 
-### Option 1: Easy Mode (Recommended)
+```bash
+git clone https://github.com/dinir/ttv-toaster.git
+cd ttv-toaster
+npm install
+```
 
-No Twitch app creation required - uses our hosted OAuth proxy.
+### 2. Choose Your Setup Mode
 
-1. Download this project
-2. Copy `.env.example` to `.env`
-3. Uncomment the `OAUTH_PROXY_URL` line in `.env`
-4. Run `npm install` and `npm start`
-5. Login and you're done!
+#### Easy Mode (Recommended)
 
-**Note**: In Easy Mode, your tokens are still stored locally on your computer. The proxy only handles the OAuth exchange.
+1. Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
 
-### Option 2: Self-Hosted Mode (Maximum Privacy)
+2. Edit `.env` and uncomment the `OAUTH_PROXY_URL` line:
+   ```env
+   OAUTH_PROXY_URL=https://ttv-toaster-oauth-handler.up.railway.app
+   ```
 
-Your own Twitch app - tokens never leave your computer.
+3. Start the server:
+   ```bash
+   npm start
+   ```
 
-1. Download this project
-2. Create a Twitch app at https://dev.twitch.tv/console/apps
-   - **Name**: "TTV Toaster (Self-hosted)" (or whatever you want)
+4. Open `http://localhost:3000` in your browser and click "Login with Twitch"
+
+#### Self-Hosted Mode (Maximum Privacy)
+
+1. Create a Twitch application:
+   - Go to [Twitch Developer Console](https://dev.twitch.tv/console/apps)
+   - Click "Register Your Application"
+   - **Name**: Choose any name (e.g., "My TTV Toaster")
    - **OAuth Redirect URLs**: `http://localhost:3000/auth/callback`
-   - **Category**: Choose any (e.g., "Application Integration")
-3. Copy `.env.example` to `.env`
-4. Add your **Client ID** and **Client Secret** to `.env`
-5. Run `npm install` and `npm start`
-6. Login and you're done!
+   - **Category**: Choose "Application Integration"
+   - Click "Create"
+   - Copy your **Client ID** and generate a **Client Secret**
 
-**Privacy**: Your Client Secret stays on your computer. No data is sent to any third party.
+2. Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
 
----
+3. Edit `.env` and add your credentials:
+   ```env
+   TWITCH_CLIENT_ID=your_client_id_here
+   TWITCH_CLIENT_SECRET=your_client_secret_here
+   ```
 
-Both modes store tokens locally in `.tokens.json` - they never leave your machine!
+4. Start the server:
+   ```bash
+   npm start
+   ```
 
-## Scratch Page API
+5. Open `http://localhost:3000` in your browser and click "Login with Twitch"
 
-The scratch page receives Twitch events as standard DOM events. Just add event listeners:
+### 3. Test Events
+
+Once authenticated, open `http://localhost:3000/scratch.html` to see events in real-time. Test by:
+- Following your own channel from another account
+- Sending chat messages starting with `!` (default filter)
+- Triggering other events on your stream
+
+### 4. Add to OBS
+
+1. In OBS, add a new **Browser Source**
+2. Set URL to: `http://localhost:3000/scratch.html`
+3. Set Width/Height to your canvas size (e.g., 1920x1080)
+4. Check "Shutdown source when not visible" for better performance
+5. Customize `scratch.html` to create your own designs!
+
+## Event Data Reference
+
+All events are dispatched as CustomEvents on the `document` object. See [EVENT_DATA.md](./EVENT_DATA.md) for complete reference.
 
 ### Available Events
 
-#### `twitch:raid`
+| Event Type | Trigger | Key Data |
+|------------|---------|----------|
+| `twitch:raid` | Someone raids your channel | `displayName`, `viewerCount`, `gameName`, `profileImageUrl` |
+| `twitch:follow` | Someone follows | `displayName`, `createdAt`, `profileImageUrl` |
+| `twitch:subscribe` | Someone subscribes | `displayName`, `tier`, `isGift`, `profileImageUrl` |
+| `twitch:gift` | Someone gifts subs | `displayName`, `amount`, `tier`, `cumulativeAmount` |
+| `twitch:cheer` | Someone cheers bits | `displayName`, `bits`, `message`, `profileImageUrl` |
+| `twitch:redemption` | Channel points redeemed | `displayName`, `rewardTitle`, `rewardCost`, `userInput` |
+| `twitch:chat` | Chat message (filtered) | `displayName`, `message`, `isMod`, `isSubscriber` |
+
+### Example Usage
+
 ```javascript
 document.addEventListener('twitch:raid', (event) => {
-  const { displayName, username, viewerCount } = event.detail
-  console.log(`${viewerCount} viewers raided from ${displayName}!`)
+  const { displayName, viewerCount, gameName, profileImageUrl } = event.detail
+
+  // Create your custom notification
+  console.log(`${displayName} raided with ${viewerCount} viewers!`)
+  console.log(`They were playing: ${gameName}`)
+
+  // Display profile image
+  const img = document.createElement('img')
+  img.src = profileImageUrl
+  document.body.appendChild(img)
 })
 ```
 
-#### `twitch:follow`
-```javascript
-document.addEventListener('twitch:follow', (event) => {
-  const { displayName, username } = event.detail
-  console.log(`${displayName} followed!`)
-})
-```
-
-#### `twitch:subscribe`
-```javascript
-document.addEventListener('twitch:subscribe', (event) => {
-  const { displayName, username, tier } = event.detail
-  // tier: '1000', '2000', or '3000'
-  console.log(`${displayName} subscribed at tier ${tier}!`)
-})
-```
-
-#### `twitch:gift`
-```javascript
-document.addEventListener('twitch:gift', (event) => {
-  const { displayName, amount, tier, isAnonymous } = event.detail
-  console.log(`${displayName} gifted ${amount} subscriptions!`)
-})
-```
-
-#### `twitch:cheer`
-```javascript
-document.addEventListener('twitch:cheer', (event) => {
-  const { displayName, bits, message } = event.detail
-  console.log(`${displayName} cheered ${bits} bits: "${message}"`)
-})
-```
-
-#### `twitch:redemption`
-```javascript
-document.addEventListener('twitch:redemption', (event) => {
-  const { displayName, rewardTitle, userInput } = event.detail
-  console.log(`${displayName} redeemed: ${rewardTitle}`)
-})
-```
-
-#### `twitch:chat`
-```javascript
-document.addEventListener('twitch:chat', (event) => {
-  const { displayName, message, color, isMod, isSubscriber, isVip, badges } = event.detail
-  console.log(`${displayName}: ${message}`)
-})
-```
-
-**Note:** Chat messages are filtered by default to prevent spam. See [Chat Filtering](#chat-filtering) below.
+See [EVENT_DATA.md](./EVENT_DATA.md) for complete examples and tips.
 
 ## Chat Filtering
 
-To prevent spam in busy channels, chat messages are filtered before being emitted. By default, only messages starting with `!` (commands) are emitted.
-
-### Default Filters
-
-- **Prefix filter**: Only messages starting with `!` pass through
-- **Rate limiting**: Maximum 10 messages per second
-- All other messages are silently ignored
-
-### Configuring Filters
-
-Create a `.chat-filters.json` file in the root directory:
+By default, only chat messages starting with `!` are sent to `scratch.html` to prevent spam. Configure filters in `.chat-filters.json` or via the API:
 
 ```json
 {
   "enabled": true,
-  "conditions": {
-    "startsWithPrefix": "!",
-    "mentionsBot": true,
-    "containsKeywords": ["hello", "help"],
-    "fromSpecificUsers": ["someuser", "anotheruser"],
-    "minLength": 5,
-    "maxLength": 500
-  },
-  "rateLimit": {
-    "enabled": true,
-    "maxMessagesPerSecond": 10
-  }
+  "prefixFilters": ["!"],
+  "blockList": []
 }
 ```
 
-**Filter Options:**
+**API Endpoints:**
+- `GET /api/chat/filters` - Get current filters
+- `POST /api/chat/filters` - Update filters
 
-- `startsWithPrefix`: Only emit messages starting with this character (e.g., `"!"` for commands)
-- `mentionsBot`: Emit messages that mention the broadcaster
-- `containsKeywords`: Array of keywords - emit if message contains any
-- `fromSpecificUsers`: Array of usernames - emit all messages from these users
-- `minLength`/`maxLength`: Filter by message length (0 = disabled)
-- `rateLimit.maxMessagesPerSecond`: Maximum messages to emit per second
-
-**How it works:**
-- If **any** condition matches, the message is emitted
-- Rate limiting is applied after filtering
-- Set `enabled: false` to disable all filtering (not recommended for big channels)
-
-### API Endpoints
-
-You can also configure filters programmatically:
-
-```bash
-# Get current filters
-curl http://localhost:3000/api/chat/filters
-
-# Update filters
-curl -X POST http://localhost:3000/api/chat/filters \
-  -H "Content-Type: application/json" \
-  -d '{"conditions": {"startsWithPrefix": "?"}}'
-
-# Reset to defaults
-curl -X POST http://localhost:3000/api/chat/filters/reset
-```
-
-## Example: Custom Notification
-
-```html
-<script>
-  document.addEventListener('twitch:raid', (event) => {
-    const { displayName, viewerCount } = event.detail
-
-    // Create notification element
-    const notification = document.createElement('div')
-    notification.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #9146FF;
-      color: white;
-      padding: 20px;
-      border-radius: 10px;
-      font-size: 24px;
-      animation: slideIn 0.5s;
-    `
-    notification.textContent = `${viewerCount} viewers raided from ${displayName}!`
-
-    document.body.appendChild(notification)
-
-    // Remove after 5 seconds
-    setTimeout(() => notification.remove(), 5000)
-  })
-</script>
-```
-
-## Using in OBS
-
-1. Add a **Browser Source** in OBS
-2. Set URL to: `http://localhost:3000/scratch.html`
-3. Set width/height as needed
-4. Customize the scratch page with your HTML/CSS/JS
-5. Events will appear live in OBS!
-
-## File Structure
+## Project Structure
 
 ```
-twitch-toaster/
+ttv-toaster/
 ├── src/
 │   └── backend/
-│       ├── server.js           # Express server
-│       ├── eventBridge.js      # Event normalization
-│       ├── routes/
-│       │   └── auth.js         # OAuth routes
-│       └── twitch/
-│           ├── auth.js         # Token management
-│           └── eventListener.js # EventSub listener
+│       ├── server.js              # Main server
+│       ├── twitch/
+│       │   ├── auth.js            # OAuth & token management
+│       │   ├── eventListener.js   # EventSub handlers
+│       │   └── chatListener.js    # Chat handlers
+│       └── bridges/
+│           └── eventBridge.js     # Socket.io bridge
 ├── public/
-│   ├── index.html              # Landing page
-│   └── scratch.html            # Developer scratch page
-├── start.bat                   # Windows startup script
-├── start.sh                    # Mac/Linux startup script
-├── .env.example                # Environment template
-└── package.json
+│   ├── index.html                 # Setup/login page
+│   └── scratch.html               # Event display page (customize this!)
+├── .env                           # Your configuration
+├── .tokens.json                   # Auth tokens (auto-generated)
+├── .chat-filters.json             # Chat filters (optional)
+└── EVENT_DATA.md                  # Event data reference
 ```
 
-## How It Works
+## Customizing Your Display
 
-1. **You log in** via Twitch OAuth
-2. **Tokens are saved** locally to `.tokens.json`
-3. **EventSub connection** is established to Twitch
-4. **Events flow** from Twitch → Server → Browser (via Socket.io)
-5. **DOM events** are dispatched for your code to handle
+The `public/scratch.html` file is your playground! It includes:
+- Socket.io client for real-time event delivery
+- Basic CSS for event styling
+- Example event handlers
+
+**Tips for customization:**
+1. Use CSS animations for eye-catching transitions
+2. Add sound effects with `new Audio('sound.mp3').play()`
+3. Use profile images from `event.detail.profileImageUrl`
+4. Filter events by game/category for raids
+5. Detect account age to filter bot follows
+6. Show special badges for partners/affiliates
+
+Check out `scratch.html` and [EVENT_DATA.md](./EVENT_DATA.md) for inspiration!
 
 ## Troubleshooting
 
-### "No tokens found" error
-- Make sure you've logged in via the web interface
-- Check that `.tokens.json` exists (created after first login)
+### "Failed to authenticate" or "Invalid client ID"
 
-### Events not appearing
-- Ensure you're logged in (check `http://localhost:3000`)
-- Events only fire when they actually happen on your stream
-- Check browser console for errors
+**Easy Mode:**
+- Verify `.env` has `OAUTH_PROXY_URL` uncommented
+- Check that the URL doesn't have a trailing slash
+- Restart the server after editing `.env`
 
-### Port 3000 already in use
-- Change the `PORT` in `.env` file
-- Update the redirect URI in your Twitch app settings
+**Self-Hosted Mode:**
+- Double-check your Client ID and Secret from [Twitch Developer Console](https://dev.twitch.tv/console/apps)
+- Ensure redirect URI is exactly `http://localhost:3000/auth/callback`
+- Make sure there are no extra spaces in your `.env` file
+
+### Events not showing up
+
+1. Check browser console at `http://localhost:3000/scratch.html` for errors
+2. Verify server console shows "EventSub WebSocket connected"
+3. Test with a simple event like chat (send a message starting with `!`)
+4. Make sure you're testing on the authenticated Twitch account
+
+### OBS Browser Source shows blank screen
+
+1. Test the URL in a regular browser first
+2. Right-click the Browser Source → Interact → Open DevTools to check for errors
+3. Ensure OBS Browser Source has correct dimensions
+4. Try toggling "Shutdown source when not visible" off temporarily
+
+### Chat messages not appearing
+
+- By default, only messages starting with `!` are sent
+- Check `.chat-filters.json` or use `GET /api/chat/filters` to see current config
+- Disable filtering: `POST /api/chat/filters` with `{"enabled": false}`
+
+### Server won't start
+
+```bash
+Error: listen EADDRINUSE: address already in use :::3000
+```
+- Port 3000 is already in use
+- Change `PORT=3000` in `.env` to another port (e.g., `PORT=3001`)
+- Or stop the other process using port 3000
+
+### Tokens expired / "401 Unauthorized"
+
+- The app automatically refreshes tokens
+- If refresh fails, click "Disconnect" at `http://localhost:3000` and re-authenticate
+- In Self-Hosted Mode, verify your Client Secret is correct
 
 ## Development
 
+### Code Style
+
+This project uses [JavaScript Standard Style](https://standardjs.com/):
+
 ```bash
-# Install dependencies
-npm install
-
-# Run with auto-restart (if you have nodemon)
-npm run dev
-
-# Lint code
-npm run lint
-
-# Auto-fix linting issues
-npm run lint:fix
+npm run lint        # Check for style issues
+npm run lint:fix    # Auto-fix style issues
 ```
 
-## Deploying Your Own OAuth Proxy (Optional)
+### File Watching
 
-If you want to provide Easy Mode to others but don't trust our hosted proxy, you can deploy your own:
+For development, consider using `nodemon`:
 
-### Deploy to Railway
-
-1. Go to [Railway](https://railway.app)
-2. Create new project from the `oauth-proxy/` folder
-3. Add environment variables:
-   - `TWITCH_CLIENT_ID`
-   - `TWITCH_CLIENT_SECRET`
-4. Deploy and copy the URL
-5. Share that URL with users (they add it as `OAUTH_PROXY_URL` in their `.env`)
-
-### Deploy to Render
-
-1. Go to [Render](https://render.com)
-2. Create new Web Service
-3. Set root directory to `oauth-proxy`
-4. Add environment variables
-5. Deploy
-
-The OAuth proxy is a tiny Express server that only exposes `/exchange` and `/refresh` endpoints. The Client Secret stays secure on your server.
+```bash
+npm install -g nodemon
+nodemon src/backend/server.js
+```
 
 ## Privacy & Security
 
-### Self-Hosted Mode
-- All tokens are stored **locally** on your computer (`.tokens.json`)
-- Your Client Secret **never** leaves your computer
-- The app only connects to **Twitch's official API**
-- Your `.tokens.json` is in `.gitignore` - never committed to git
-
-### Easy Mode (with OAuth Proxy)
-- Tokens are still stored **locally** on your computer (`.tokens.json`)
-- The proxy only handles OAuth code exchange (one-time operation)
-- After login, all communication goes directly to **Twitch's official API**
-- The proxy never stores or logs your tokens
-
-## License
-
-ISC
+- **Easy Mode**: Tokens are exchanged via Railway-hosted proxy, then stored locally
+- **Self-Hosted Mode**: All authentication happens locally, no third-party services
+- Tokens are stored in `.tokens.json` (gitignored by default)
+- Never commit `.env` or `.tokens.json` to version control
+- Railway proxy source code is in `oauth-proxy/` for transparency
 
 ## Contributing
 
-Contributions welcome! Feel free to open issues or pull requests.
+Contributions are welcome! Please:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Follow JavaScript Standard style (`npm run lint`)
+4. Commit your changes (`git commit -m 'Add amazing feature'`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
+
+## License
+
+ISC License - See [LICENSE](LICENSE) for details
+
+## Credits
+
+Built with [Twurple](https://twurple.js.org/) - The powerful Twitch API library for Node.js
+
+## Support
+
+- [GitHub Issues](https://github.com/dinir/ttv-toaster/issues) - Bug reports and feature requests
+- [EVENT_DATA.md](./EVENT_DATA.md) - Complete event data reference
+- [Twurple Documentation](https://twurple.js.org/) - API library docs
+- [Twitch EventSub Reference](https://dev.twitch.tv/docs/eventsub/) - Official Twitch docs
 
 ---
 
-**Made for streamers, by developers.**
+**Happy streaming!** If you build something cool with TTV Toaster, share it with the community!
