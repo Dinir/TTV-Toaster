@@ -51,7 +51,7 @@ const listenerManager = require('./listenerManager')
 
 // Start server
 server.listen(PORT, async () => {
-  console.log(`Twitch Toaster server running on http://localhost:${PORT}`)
+  console.log(`TTV Toaster server running on http://localhost:${PORT}`)
   console.log('Visit http://localhost:3000 to get started!')
 
   // Check if user is already authenticated

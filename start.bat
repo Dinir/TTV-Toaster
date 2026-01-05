@@ -1,5 +1,5 @@
 @echo off
-echo Starting Twitch Toaster...
+echo Starting ttv Toaster...
 echo.
 
 REM Check if node_modules exists

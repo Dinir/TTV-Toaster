@@ -4,7 +4,7 @@ This guide shows how to deploy the OAuth proxy to various hosting platforms.
 
 ## Why Deploy This?
 
-The OAuth proxy allows users to run Twitch Toaster in "Easy Mode" without creating their own Twitch app. It keeps the Client Secret secure on the server while still allowing users to authenticate.
+The OAuth proxy allows users to run TTV Toaster in "Easy Mode" without creating their own Twitch app. It keeps the Client Secret secure on the server while still allowing users to authenticate.
 
 ## Prerequisites
 

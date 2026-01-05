@@ -1,4 +1,4 @@
-# Twitch Toaster Setup Guide
+# TTV Toaster Setup Guide
 
 ## First 4 Steps Completed
 
@@ -129,7 +129,7 @@ TWITCH_REFRESH_TOKEN=your_refresh_token_here
 ### 3. Get Twitch App Credentials
 1. Go to https://dev.twitch.tv/console/apps
 2. Click "Register Your Application"
-3. Name: "Twitch Toaster" (or whatever)
+3. Name: "TTV Toaster (Self-hosted)" (or whatever)
 4. OAuth Redirect URLs: `http://localhost:3000` (for now)
 5. Category: Chat Bot or other
 6. Copy Client ID and generate Client Secret
@@ -151,7 +151,7 @@ npm start
 
 You should see:
 ```
-Twitch Toaster server running on http://localhost:3000
+TTV Toaster server running on http://localhost:3000
 Waiting for Twitch events...
 [Auth] Authentication initialized successfully
 [EventSub] Listening to channel: YourChannel (ID: 123456789)

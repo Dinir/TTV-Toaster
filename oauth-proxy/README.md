@@ -1,13 +1,13 @@
-# Twitch Toaster OAuth Proxy
+# TTV Toaster OAuth Proxy
 
-This is a minimal OAuth proxy server for Twitch Toaster. It handles OAuth token exchange without exposing your Client Secret to end users.
+This is a minimal OAuth proxy server for TTV Toaster. It handles OAuth token exchange without exposing your Client Secret to end users.
 
 ## Purpose
 
 - Keeps `TWITCH_CLIENT_SECRET` secure on the server
 - Provides `/exchange` endpoint to convert OAuth codes into tokens
 - Provides `/refresh` endpoint to refresh expired tokens
-- Enables "Easy Mode" for Twitch Toaster users who don't want to create their own Twitch app
+- Enables "Easy Mode" for TTV Toaster users who don't want to create their own Twitch app
 
 ## Deployment
 

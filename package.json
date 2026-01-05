@@ -1,5 +1,5 @@
 {
-  "name": "twitch-toaster",
+  "name": "ttv-toaster",
   "version": "1.0.0",
   "description": "Developer-friendly tool for receiving Twitch stream events in a scratch page environment",
   "main": "src/backend/server.js",
@@ -22,7 +22,7 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/twitch-toaster"
+    "url": "https://github.com/dinir/ttv-toaster"
   },
   "type": "commonjs",
   "dependencies": {

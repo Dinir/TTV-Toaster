@@ -14,7 +14,7 @@ Get up and running in 5 minutes!
 1. Visit https://dev.twitch.tv/console/apps
 2. Click "Register Your Application"
 3. Fill in:
-   - **Name**: `Twitch Toaster`
+   - **Name**: `TTV Toaster (Self-hosted)`
    - **OAuth Redirect URLs**: `http://localhost:3000/auth/callback`
    - **Category**: Application Integration
 4. Click "Create"

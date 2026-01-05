@@ -1,4 +1,4 @@
-# Twitch Toaster
+# TTV Toaster
 
 A developer-friendly tool for receiving Twitch stream events in a scratch page environment. Perfect for building custom stream notifications, overlays, and interactive displays.
 
@@ -12,7 +12,7 @@ A developer-friendly tool for receiving Twitch stream events in a scratch page e
 
 ## Quick Start
 
-Twitch Toaster supports two modes - choose the one that fits your needs:
+TTV Toaster supports two modes - choose the one that fits your needs:
 
 ### Option 1: Easy Mode (Recommended)
 
@@ -32,7 +32,7 @@ Your own Twitch app - tokens never leave your computer.
 
 1. Download this project
 2. Create a Twitch app at https://dev.twitch.tv/console/apps
-   - **Name**: Twitch Toaster (or whatever you want)
+   - **Name**: "TTV Toaster (Self-hosted)" (or whatever you want)
    - **OAuth Redirect URLs**: `http://localhost:3000/auth/callback`
    - **Category**: Choose any (e.g., "Application Integration")
 3. Copy `.env.example` to `.env`

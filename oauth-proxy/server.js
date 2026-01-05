@@ -16,7 +16,7 @@ app.use(express.json())
 // Health check endpoint with public client ID
 app.get('/', (req, res) => {
   res.json({
-    service: 'Twitch Toaster OAuth Proxy',
+    service: 'TTV Toaster OAuth Proxy',
     status: 'running',
     version: '1.0.0',
     clientId: process.env.TWITCH_CLIENT_ID // Public - safe to expose

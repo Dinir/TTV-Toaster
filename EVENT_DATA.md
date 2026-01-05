@@ -1,6 +1,6 @@
 # Event Data Reference
 
-This document lists all available data fields for each Twitch event type in Twitch Toaster.
+This document lists all available data fields for each Twitch event type in TTV Toaster.
 
 ## Event Types
 
@@ -202,7 +202,7 @@ Triggered when a chat message passes the configured filters.
 document.addEventListener('twitch:chat', (event) => {
   const { displayName, message, isMod, isSubscriber } = event.detail
   const badges = []
-  if (isMod) badges.push('=á')
+  if (isMod) badges.push('=ï¿½')
   if (isSubscriber) badges.push('P')
   console.log(`${badges.join('')} ${displayName}: ${message}`)
 })
@@ -238,7 +238,7 @@ Use `broadcasterType` to show special badges:
 ```javascript
 const getBadge = (broadcasterType) => {
   if (broadcasterType === 'partner') return ''
-  if (broadcasterType === 'affiliate') return '¡'
+  if (broadcasterType === 'affiliate') return 'ï¿½'
   return ''
 }
 ```
@@ -253,7 +253,7 @@ document.addEventListener('twitch:follow', (event) => {
   const daysSinceCreation = (Date.now() - createdAt) / (1000 * 60 * 60 * 24)
 
   if (daysSinceCreation < 7) {
-    console.log(`  New account! ${displayName} account is only ${Math.floor(daysSinceCreation)} days old`)
+    console.log(`ï¿½ New account! ${displayName} account is only ${Math.floor(daysSinceCreation)} days old`)
   }
 })
 ```

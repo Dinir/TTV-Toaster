@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Starting Twitch Toaster..."
+echo "Starting TTV Toaster..."
 echo ""
 
 # Check if node_modules exists
