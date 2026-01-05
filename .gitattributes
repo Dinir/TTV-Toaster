@@ -1,0 +1,4 @@
+# Files to exclude from release archives
+oauth-proxy/ export-ignore
+.github/ export-ignore
+Session*.md export-ignore

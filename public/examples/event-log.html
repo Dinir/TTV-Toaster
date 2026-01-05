@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Log - TTV Toaster Example</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      margin: 0 0 10px 0;
+      color: #9146FF;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    .status.connected {
+      background: #28a745;
+      color: white;
+    }
+
+    .status.disconnected {
+      background: #dc3545;
+      color: white;
+    }
+
+    #event-log {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .event {
+      background: #16213e;
+      border-left: 4px solid #9146FF;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      animation: slideIn 0.3s ease-out;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .event-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .event-content {
+      flex: 1;
+    }
+
+    .event-type {
+      font-weight: 600;
+      color: #9146FF;
+      text-transform: uppercase;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .event-data {
+      font-size: 16px;
+    }
+
+    .partner-badge {
+      color: #9146FF;
+      font-weight: bold;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Event Log</h1>
+    <p>All events with rich data and profile pictures</p>
+    <div id="status" class="status disconnected">Connecting...</div>
+  </div>
+
+  <div id="event-log"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/ttv-toaster.js"></script>
+  <script>
+    const statusEl = document.getElementById('status')
+    const eventLog = document.getElementById('event-log')
+
+    // Update status indicator
+    socket.on('connect', () => {
+      statusEl.textContent = 'Connected'
+      statusEl.className = 'status connected'
+    })
+
+    socket.on('disconnect', () => {
+      statusEl.textContent = 'Disconnected'
+      statusEl.className = 'status disconnected'
+    })
+
+    // Event handlers
+    document.addEventListener('twitch:raid', (event) => {
+      const { displayName, viewerCount, gameName, broadcasterType, profileImageUrl } = event.detail
+      const badge = broadcasterType === 'partner' ? '<span class="partner-badge">✓</span> ' : ''
+      const gameInfo = gameName && gameName !== 'Unknown' ? ` (was streaming ${gameName})` : ''
+      addEvent('raid', profileImageUrl, `${badge}${displayName} raided with ${viewerCount} viewers!${gameInfo}`)
+    })
+
+    document.addEventListener('twitch:follow', (event) => {
+      const { displayName, profileImageUrl, createdAt } = event.detail
+      const accountAge = Math.floor((Date.now() - new Date(createdAt)) / (1000 * 60 * 60 * 24))
+      const ageWarning = accountAge < 7 ? ` (⚠️ ${accountAge} days old)` : ''
+      addEvent('follow', profileImageUrl, `${displayName} followed!${ageWarning}`)
+    })
+
+    document.addEventListener('twitch:subscribe', (event) => {
+      const { displayName, tier, profileImageUrl, isGift } = event.detail
+      const tierName = { '1000': 'Tier 1', '2000': 'Tier 2', '3000': 'Tier 3' }[tier] || 'Tier 1'
+      const giftText = isGift ? ' (Gift)' : ''
+      addEvent('subscribe', profileImageUrl, `${displayName} subscribed (${tierName})!${giftText}`)
+    })
+
+    document.addEventListener('twitch:gift', (event) => {
+      const { displayName, amount, cumulativeAmount, profileImageUrl } = event.detail
+      addEvent('gift', profileImageUrl, `${displayName} gifted ${amount} subs! (${cumulativeAmount} total this session)`)
+    })
+
+    document.addEventListener('twitch:cheer', (event) => {
+      const { displayName, bits, message, profileImageUrl } = event.detail
+      addEvent('cheer', profileImageUrl, `${displayName} cheered ${bits} bits: "${message}"`)
+    })
+
+    document.addEventListener('twitch:redemption', (event) => {
+      const { displayName, rewardTitle, rewardCost, userInput, profileImageUrl } = event.detail
+      const input = userInput ? ` - "${userInput}"` : ''
+      addEvent('redemption', profileImageUrl, `${displayName} redeemed: ${rewardTitle} (${rewardCost} points)${input}`)
+    })
+
+    document.addEventListener('twitch:chat', (event) => {
+      const { displayName, message, isMod, isSubscriber } = event.detail
+      const badges = []
+      if (isMod) badges.push('MOD')
+      if (isSubscriber) badges.push('SUB')
+      const badgeStr = badges.length > 0 ? `[${badges.join(',')}] ` : ''
+      addEvent('chat', null, `${badgeStr}${displayName}: ${message}`)
+    })
+
+    function addEvent (type, avatarUrl, message) {
+      const eventDiv = document.createElement('div')
+      eventDiv.className = 'event'
+
+      const avatar = avatarUrl
+        ? `<img src="${avatarUrl}" class="event-avatar" alt="Avatar">`
+        : '<div class="event-avatar" style="background: #9146FF;"></div>'
+
+      eventDiv.innerHTML = `
+        ${avatar}
+        <div class="event-content">
+          <div class="event-type">${type}</div>
+          <div class="event-data">${message}</div>
+        </div>
+      `
+      eventLog.insertBefore(eventDiv, eventLog.firstChild)
+
+      // Keep only last 50 events
+      while (eventLog.children.length > 50) {
+        eventLog.removeChild(eventLog.lastChild)
+      }
+    }
+  </script>
+</body>
+</html>

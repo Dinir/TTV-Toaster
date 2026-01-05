@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimal Alerts - TTV Toaster Example</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .notification {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: rgba(0, 0, 0, 0.85);
+      color: white;
+      padding: 20px 30px;
+      border-radius: 10px;
+      border-left: 5px solid #9146FF;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      transform: translateX(400px);
+      opacity: 0;
+      transition: all 0.3s ease-out;
+      max-width: 400px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .notification-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .notification-content {
+      flex: 1;
+    }
+
+    .notification-type {
+      font-size: 12px;
+      text-transform: uppercase;
+      opacity: 0.7;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .notification-message {
+      font-size: 16px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/ttv-toaster.js"></script>
+  <script>
+    // Notification queue
+    const queue = []
+    let isShowing = false
+
+    function showNotification (type, message, avatarUrl) {
+      queue.push({ type, message, avatarUrl })
+      processQueue()
+    }
+
+    function processQueue () {
+      if (isShowing || queue.length === 0) return
+
+      isShowing = true
+      const { type, message, avatarUrl } = queue.shift()
+
+      const notification = document.createElement('div')
+      notification.className = 'notification'
+
+      const avatar = avatarUrl
+        ? `<img src="${avatarUrl}" class="notification-avatar" alt="Avatar">`
+        : '<div class="notification-avatar" style="background: #9146FF;"></div>'
+
+      notification.innerHTML = `
+        ${avatar}
+        <div class="notification-content">
+          <div class="notification-type">${type}</div>
+          <div class="notification-message">${message}</div>
+        </div>
+      `
+
+      document.body.appendChild(notification)
+
+      setTimeout(() => notification.classList.add('show'), 50)
+
+      setTimeout(() => {
+        notification.classList.remove('show')
+        setTimeout(() => {
+          notification.remove()
+          isShowing = false
+          processQueue()
+        }, 300)
+      }, 5000)
+    }
+
+    // Event handlers
+    document.addEventListener('twitch:raid', (event) => {
+      const { displayName, viewerCount, profileImageUrl } = event.detail
+      showNotification('Raid', `${displayName} raided with ${viewerCount} viewers!`, profileImageUrl)
+    })
+
+    document.addEventListener('twitch:follow', (event) => {
+      const { displayName, profileImageUrl } = event.detail
+      showNotification('Follow', `${displayName} followed!`, profileImageUrl)
+    })
+
+    document.addEventListener('twitch:subscribe', (event) => {
+      const { displayName, tier, profileImageUrl } = event.detail
+      const tierName = { '1000': 'Tier 1', '2000': 'Tier 2', '3000': 'Tier 3' }[tier] || 'Tier 1'
+      showNotification('Subscription', `${displayName} subscribed (${tierName})!`, profileImageUrl)
+    })
+
+    document.addEventListener('twitch:gift', (event) => {
+      const { displayName, amount, profileImageUrl } = event.detail
+      showNotification('Gift Subs', `${displayName} gifted ${amount} subscription${amount > 1 ? 's' : ''}!`, profileImageUrl)
+    })
+
+    document.addEventListener('twitch:cheer', (event) => {
+      const { displayName, bits, profileImageUrl } = event.detail
+      showNotification('Cheer', `${displayName} cheered ${bits} bits!`, profileImageUrl)
+    })
+
+    document.addEventListener('twitch:redemption', (event) => {
+      const { displayName, rewardTitle, profileImageUrl } = event.detail
+      showNotification('Redemption', `${displayName} redeemed: ${rewardTitle}`, profileImageUrl)
+    })
+  </script>
+</body>
+</html>

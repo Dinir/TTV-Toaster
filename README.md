@@ -46,7 +46,7 @@ npm install
 
 2. Edit `.env` and uncomment the `OAUTH_PROXY_URL` line:
    ```env
-   OAUTH_PROXY_URL=https://ttv-toaster-oauth-handler.up.railway.app
+   OAUTH_PROXY_URL=https://toaster.dinir.works
    ```
 
 3. Start the server:
@@ -173,22 +173,45 @@ ttv-toaster/
 └── EVENT_DATA.md                  # Event data reference
 ```
 
+## Example Templates
+
+Check out the `/examples` directory for ready-to-use templates:
+
+### 📋 Event Log (`/examples/event-log.html`)
+- Shows all events with profile pictures
+- Partner/affiliate badges
+- Account age warnings
+- Perfect for testing and development
+
+### 🎉 Raid Alert (`/examples/raid-alert.html`)
+- Full-screen raid notifications
+- Animated entrance/exit
+- Shows game raider was streaming
+
+### 🔔 Minimal Alerts (`/examples/minimal-alerts.html`)
+- Clean bottom-right notifications
+- Queue system for multiple events
+- Works with all event types
+
+**Try them:** Open `http://localhost:3000/examples/` in your browser or add to OBS as a Browser Source!
+
 ## Customizing Your Display
 
-The `public/scratch.html` file is your playground! It includes:
-- Socket.io client for real-time event delivery
-- Basic CSS for event styling
-- Example event handlers
+The `public/scratch.html` file is your blank canvas:
+- Minimal boilerplate (just Socket.io + event dispatcher)
+- Transparent background (OBS-ready)
+- Comments showing available events
+- One example handler to get you started
 
 **Tips for customization:**
-1. Use CSS animations for eye-catching transitions
-2. Add sound effects with `new Audio('sound.mp3').play()`
-3. Use profile images from `event.detail.profileImageUrl`
-4. Filter events by game/category for raids
-5. Detect account age to filter bot follows
-6. Show special badges for partners/affiliates
+1. Start with an example template or build from scratch
+2. Use `event.detail.profileImageUrl` for profile pictures
+3. Add CSS animations for eye-catching transitions
+4. Play sounds with `new Audio('sound.mp3').play()`
+5. Filter events (e.g., raids with 10+ viewers only)
+6. Show partner badges, account ages, game info, etc.
 
-Check out `scratch.html` and [EVENT_DATA.md](./EVENT_DATA.md) for inspiration!
+See [EVENT_DATA.md](./EVENT_DATA.md) for all available event properties!
 
 ## Troubleshooting
 

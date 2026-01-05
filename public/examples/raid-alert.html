@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raid Alert - TTV Toaster Example</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    .raid-alert {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px 60px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      text-align: center;
+      opacity: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .raid-alert.show {
+      animation: raidPop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+    }
+
+    .raid-alert.hide {
+      animation: raidFade 0.5s ease-out forwards;
+    }
+
+    .raid-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 4px solid white;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .raid-name {
+      font-size: 48px;
+      font-weight: bold;
+      color: white;
+      margin: 0 0 10px 0;
+      text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .raid-viewers {
+      font-size: 32px;
+      color: rgba(255, 255, 255, 0.9);
+      margin: 0 0 10px 0;
+    }
+
+    .raid-game {
+      font-size: 20px;
+      color: rgba(255, 255, 255, 0.7);
+      margin: 0;
+      font-style: italic;
+    }
+
+    .partner-badge {
+      display: inline-block;
+      background: white;
+      color: #9146FF;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    @keyframes raidPop {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+
+    @keyframes raidFade {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+      }
+    }
+  </style>
+</head>
+<body>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/ttv-toaster.js"></script>
+  <script>
+    // Raid alert handler
+    document.addEventListener('twitch:raid', (event) => {
+      const { displayName, viewerCount, gameName, broadcasterType, profileImageUrl } = event.detail
+
+      // Create alert element
+      const alert = document.createElement('div')
+      alert.className = 'raid-alert'
+
+      // Build content
+      let content = `<img src="${profileImageUrl}" class="raid-avatar" alt="${displayName}">`
+
+      if (broadcasterType === 'partner') {
+        content += '<div class="partner-badge">✓ TWITCH PARTNER</div>'
+      } else if (broadcasterType === 'affiliate') {
+        content += '<div class="partner-badge">AFFILIATE</div>'
+      }
+
+      content += `
+        <h1 class="raid-name">${displayName}</h1>
+        <p class="raid-viewers">${viewerCount} viewers!</p>
+      `
+
+      if (gameName && gameName !== 'Unknown') {
+        content += `<p class="raid-game">Was streaming: ${gameName}</p>`
+      }
+
+      alert.innerHTML = content
+
+      // Add to page and animate
+      document.body.appendChild(alert)
+
+      // Show animation
+      setTimeout(() => alert.classList.add('show'), 50)
+
+      // Hide after 8 seconds
+      setTimeout(() => {
+        alert.classList.remove('show')
+        alert.classList.add('hide')
+        setTimeout(() => alert.remove(), 500)
+      }, 8000)
+    })
+  </script>
+</body>
+</html>

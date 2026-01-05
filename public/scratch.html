@@ -4,234 +4,36 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TTV Toaster - Scratch Page</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 20px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: #1a1a2e;
-      color: #eee;
-    }
-
-    #event-log {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .event {
-      background: #16213e;
-      border-left: 4px solid #9146FF;
-      padding: 15px;
-      margin-bottom: 10px;
-      border-radius: 4px;
-      animation: slideIn 0.3s ease-out;
-    }
-
-    .event-type {
-      font-weight: 600;
-      color: #9146FF;
-      text-transform: uppercase;
-      font-size: 12px;
-      margin-bottom: 5px;
-    }
-
-    .event-data {
-      font-size: 16px;
-    }
-
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateX(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    .status {
-      display: inline-block;
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      margin-top: 10px;
-    }
-
-    .status.connected {
-      background: #28a745;
-      color: white;
-    }
-
-    .status.disconnected {
-      background: #dc3545;
-      color: white;
-    }
-
-    .info-box {
-      background: #16213e;
-      border: 1px solid #9146FF;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 30px;
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .info-box h3 {
-      margin-top: 0;
-      color: #9146FF;
-    }
-
-    .info-box code {
-      background: #0f0f23;
-      padding: 2px 6px;
-      border-radius: 3px;
-      color: #f8f8f2;
-    }
-
-    pre {
-      background: #0f0f23;
-      padding: 15px;
-      border-radius: 4px;
-      overflow-x: auto;
-      font-size: 13px;
-    }
-  </style>
+  <link rel="stylesheet" href="ttv-toaster.css"/>
+  <!-- Your custom styles here -->
 </head>
 <body>
-  <div class="header">
-    <h1>TTV Toaster - Scratch Page</h1>
-    <p>Build whatever you want here. Events will flow through!</p>
-    <div id="status" class="status disconnected">Connecting...</div>
-  </div>
+  <!-- Your custom HTML here -->
 
-  <div class="info-box">
-    <h3>How to use this page:</h3>
-    <p>This page automatically receives Twitch events and dispatches them as DOM events. Listen for them like this:</p>
-    <pre>document.addEventListener('twitch:raid', (event) => {
-  const { displayName, viewerCount, gameName, title } = event.detail
-  console.log(`${viewerCount} viewers raided from ${displayName}!`)
-  console.log(`They were streaming: ${gameName}`)
-  // Show your custom notification here!
-})</pre>
-    <p style="margin-top: 15px;">Available events: <code>twitch:raid</code>, <code>twitch:follow</code>, <code>twitch:subscribe</code>, <code>twitch:gift</code>, <code>twitch:cheer</code>, <code>twitch:redemption</code>, <code>twitch:chat</code></p>
-    <p style="margin-top: 10px;">Each event includes rich data like profile images, broadcaster status, game/category info, reward costs, and more. Open your browser console and check <code>event.detail</code> to see all available properties!</p>
-    <p style="margin-top: 10px;"><strong>Chat Filtering:</strong> By default, only messages starting with <code>!</code> are emitted to prevent spam. Configure filters at <code>/api/chat/filters</code> or create a <code>.chat-filters.json</code> file.</p>
-  </div>
-
-  <div id="event-log"></div>
-
-  <!-- Socket.io client -->
+  <!-- TTV Toaster (required) -->
   <script src="/socket.io/socket.io.js"></script>
+  <script src="/ttv-toaster.js"></script>
 
-  <!-- Event client and dispatcher -->
+  <!-- Your custom JavaScript here -->
   <script>
-    const socket = io()
-    const statusEl = document.getElementById('status')
-    const eventLog = document.getElementById('event-log')
+    // Available events:
+    // - twitch:raid
+    // - twitch:follow
+    // - twitch:subscribe
+    // - twitch:gift
+    // - twitch:cheer
+    // - twitch:redemption
+    // - twitch:chat
+    //
+    // See EVENT_DATA.md for all available properties
+    // See /examples for ready-to-use templates
 
-    // Connection status
-    socket.on('connect', () => {
-      console.log('[TTV Toaster] Connected to server')
-      statusEl.textContent = 'Connected'
-      statusEl.className = 'status connected'
-    })
-
-    socket.on('disconnect', () => {
-      console.log('[TTV Toaster] Disconnected from server')
-      statusEl.textContent = 'Disconnected'
-      statusEl.className = 'status disconnected'
-    })
-
-    // Receive Twitch events from server
-    socket.on('twitch-event', (event) => {
-      console.log('[Twitch Event]', event)
-
-      // Dispatch as custom DOM event
-      const customEvent = new CustomEvent(`twitch:${event.type}`, {
-        detail: event.data,
-        bubbles: true
-      })
-      document.dispatchEvent(customEvent)
-    })
-
-    // Example event listeners (user can customize these!)
+    // Example: Listen for raid events
     document.addEventListener('twitch:raid', (event) => {
-      const { displayName, viewerCount, gameName, broadcasterType, profileImageUrl } = event.detail
-      const partnerBadge = broadcasterType === 'partner' ? '✓ ' : ''
-      const gameInfo = gameName && gameName !== 'Unknown' ? ` (was streaming ${gameName})` : ''
-      addEventToLog('raid', `${partnerBadge}${displayName} raided with ${viewerCount} viewers!${gameInfo}`)
+      const { displayName, viewerCount, gameName, profileImageUrl } = event.detail
+      console.log(`${displayName} raided with ${viewerCount} viewers!`)
+      // Your code here
     })
-
-    document.addEventListener('twitch:follow', (event) => {
-      const { displayName } = event.detail
-      addEventToLog('follow', `${displayName} followed!`)
-    })
-
-    document.addEventListener('twitch:subscribe', (event) => {
-      const { displayName, tier } = event.detail
-      const tierName = { '1000': 'Tier 1', '2000': 'Tier 2', '3000': 'Tier 3' }[tier] || 'Tier 1'
-      addEventToLog('subscribe', `${displayName} subscribed (${tierName})!`)
-    })
-
-    document.addEventListener('twitch:gift', (event) => {
-      const { displayName, amount } = event.detail
-      addEventToLog('gift', `${displayName} gifted ${amount} subscription${amount > 1 ? 's' : ''}!`)
-    })
-
-    document.addEventListener('twitch:cheer', (event) => {
-      const { displayName, bits, message } = event.detail
-      addEventToLog('cheer', `${displayName} cheered ${bits} bits: "${message}"`)
-    })
-
-    document.addEventListener('twitch:redemption', (event) => {
-      const { displayName, rewardTitle, rewardCost, userInput } = event.detail
-      const inputText = userInput ? ` - "${userInput}"` : ''
-      addEventToLog('redemption', `${displayName} redeemed: ${rewardTitle} (${rewardCost} points)${inputText}`)
-    })
-
-    document.addEventListener('twitch:chat', (event) => {
-      const { displayName, message, color, isMod, isSubscriber } = event.detail
-      const badges = []
-      if (isMod) badges.push('MOD')
-      if (isSubscriber) badges.push('SUB')
-      const badgeStr = badges.length > 0 ? `[${badges.join(',')}] ` : ''
-      addEventToLog('chat', `${badgeStr}${displayName}: ${message}`, color)
-    })
-
-    // Helper function to add events to the log (just for demonstration)
-    function addEventToLog (type, message, color = null) {
-      const eventDiv = document.createElement('div')
-      eventDiv.className = 'event'
-      const dataEl = `<div class="event-data"${color ? ` style="color: ${color}"` : ''}>${message}</div>`
-      eventDiv.innerHTML = `
-        <div class="event-type">${type}</div>
-        ${dataEl}
-      `
-      eventLog.insertBefore(eventDiv, eventLog.firstChild)
-
-      // Keep only last 50 events (increased for chat)
-      while (eventLog.children.length > 50) {
-        eventLog.removeChild(eventLog.lastChild)
-      }
-    }
-  </script>
-
-  <!-- USER CODE GOES BELOW THIS LINE -->
-  <!-- Users can add their own scripts, styles, and HTML here -->
-  <script>
-    // Example: Add your own custom event handlers here!
-    // document.addEventListener('twitch:raid', (event) => {
-    //   // Your custom code
-    // })
   </script>
 </body>
 </html>
