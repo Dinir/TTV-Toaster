@@ -53,6 +53,18 @@ require('./eventBridge')
 // Import listener manager
 const listenerManager = require('./listenerManager')
 
+// Handle server errors
+server.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`\nError: Port ${PORT} is already in use!`)
+    console.error('Please stop the other process or change the PORT in your .env file')
+    process.exit(1)
+  } else {
+    console.error('Server error:', error)
+    process.exit(1)
+  }
+})
+
 // Start server
 server.listen(PORT, async () => {
   console.log(`TTV Toaster server running on http://localhost:${PORT}`)
