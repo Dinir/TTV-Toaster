@@ -29,9 +29,7 @@ function setupTestEventRoutes (app) {
         displayName: 'TestSub',
         tier: '1000',
         isGift: false,
-        profileImageUrl: 'https://static-cdn.jtvnw.net/jtv_user_pictures/default_profile_image-300x300.png',
-        broadcasterType: 'affiliate',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 365) // 1 year old
+        profileImageUrl: 'https://static-cdn.jtvnw.net/jtv_user_pictures/default_profile_image-300x300.png'
       },
       gift: {
         username: 'generousgifter',
@@ -48,8 +46,7 @@ function setupTestEventRoutes (app) {
         bits: 100,
         message: 'PogChamp Great stream! Cheer100',
         isAnonymous: false,
-        profileImageUrl: 'https://static-cdn.jtvnw.net/jtv_user_pictures/default_profile_image-300x300.png',
-        broadcasterType: ''
+        profileImageUrl: 'https://static-cdn.jtvnw.net/jtv_user_pictures/default_profile_image-300x300.png'
       },
       redemption: {
         username: 'redeemer',
