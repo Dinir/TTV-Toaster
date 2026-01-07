@@ -1,4 +1,4 @@
-const { RefreshingAuthProvider } = require('@twurple/auth')
+const { RefreshingAuthProvider, StaticAuthProvider } = require('@twurple/auth')
 const fs = require('fs').promises
 const path = require('path')
 
@@ -87,25 +87,31 @@ class TwitchAuth {
       }
     }
 
-    // Create refreshing auth provider
-    this.authProvider = new RefreshingAuthProvider({
-      clientId,
-      clientSecret
-    })
+    // In proxy mode, use StaticAuthProvider since proxy handles token refresh
+    // In self-hosted mode, use RefreshingAuthProvider for automatic refresh
+    if (OAUTH_PROXY_URL && clientSecret === 'unused-in-proxy-mode') {
+      // Proxy mode: use static auth (tokens must be refreshed manually via proxy)
+      this.authProvider = new StaticAuthProvider(clientId, tokenData.accessToken, tokenData.scope)
+      console.log('[Auth] Using StaticAuthProvider (proxy mode - manual token refresh)')
+    } else {
+      // Self-hosted mode: use refreshing auth provider
+      this.authProvider = new RefreshingAuthProvider({
+        clientId,
+        clientSecret
+      })
 
-    // Add user with token data
-    // Use scopes from token data if available, otherwise use default scopes
-    const scopes = tokenData.scope || ['channel:read:subscriptions', 'channel:read:redemptions', 'bits:read', 'moderator:read:followers', 'chat:read']
+      // Register the user with the auth provider
+      // Use addUserForToken which works better with ChatClient
+      await this.authProvider.addUserForToken(tokenData, ['chat'])
 
-    // Register the user with the auth provider
-    // Use addUserForToken which works better with ChatClient
-    await this.authProvider.addUserForToken(tokenData, ['chat'])
+      // Set up token refresh callback to save new tokens
+      this.authProvider.onRefresh(async (userId, newTokenData) => {
+        await this.saveTokens(newTokenData)
+        console.log('[Auth] Tokens refreshed and saved')
+      })
 
-    // Set up token refresh callback to save new tokens
-    this.authProvider.onRefresh(async (userId, newTokenData) => {
-      await this.saveTokens(newTokenData)
-      console.log('[Auth] Tokens refreshed and saved')
-    })
+      console.log('[Auth] Using RefreshingAuthProvider (self-hosted mode - automatic refresh)')
+    }
 
     console.log('[Auth] Authentication initialized successfully')
     return this.authProvider
