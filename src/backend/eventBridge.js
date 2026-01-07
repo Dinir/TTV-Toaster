@@ -46,36 +46,47 @@ class EventBridge {
 
   /**
    * Handle raid event
-   * @param {object} raidData - { username, viewerCount, displayName }
+   * @param {object} raidData - { username, viewerCount, displayName, profileImageUrl, broadcasterType, description, gameName, gameId, title }
    */
   handleRaid (raidData) {
     this.emit('raid', {
       username: raidData.username,
       displayName: raidData.displayName || raidData.username,
-      viewerCount: raidData.viewerCount
+      viewerCount: raidData.viewerCount,
+      profileImageUrl: raidData.profileImageUrl,
+      broadcasterType: raidData.broadcasterType,
+      description: raidData.description,
+      gameName: raidData.gameName,
+      gameId: raidData.gameId,
+      title: raidData.title
     })
   }
 
   /**
    * Handle follow event
-   * @param {object} followData - { username, displayName }
+   * @param {object} followData - { username, displayName, profileImageUrl, createdAt, description }
    */
   handleFollow (followData) {
     this.emit('follow', {
       username: followData.username,
-      displayName: followData.displayName || followData.username
+      displayName: followData.displayName || followData.username,
+      profileImageUrl: followData.profileImageUrl,
+      createdAt: followData.createdAt,
+      description: followData.description
     })
   }
 
   /**
    * Handle subscription event
-   * @param {object} subData - { username, displayName, tier }
+   * @param {object} subData - { username, displayName, tier, isGift, profileImageUrl }
    */
   handleSubscribe (subData) {
     this.emit('subscribe', {
       username: subData.username,
       displayName: subData.displayName || subData.username,
-      tier: subData.tier || '1000' // 1000, 2000, 3000 (Tier 1, 2, 3)
+      tier: subData.tier || '1000', // 1000, 2000, 3000 (Tier 1, 2, 3)
+      isGift: subData.isGift || false,
+      profileImageUrl: subData.profileImageUrl
     })
   }
 
@@ -97,14 +108,16 @@ class EventBridge {
 
   /**
    * Handle cheer/bits event
-   * @param {object} cheerData - { username, displayName, bits, message }
+   * @param {object} cheerData - { username, displayName, bits, message, isAnonymous, profileImageUrl }
    */
   handleCheer (cheerData) {
     this.emit('cheer', {
       username: cheerData.username,
       displayName: cheerData.displayName || cheerData.username,
       bits: cheerData.bits,
-      message: cheerData.message || ''
+      message: cheerData.message || '',
+      isAnonymous: cheerData.isAnonymous || false,
+      profileImageUrl: cheerData.profileImageUrl
     })
   }
 

@@ -72,9 +72,7 @@ Triggered when someone subscribes to your channel.
   displayName: string,           // Subscriber's display name
   tier: string,                  // '1000' (Tier 1), '2000' (Tier 2), '3000' (Tier 3)
   isGift: boolean,               // Whether this is a gifted sub
-  profileImageUrl: string,       // Subscriber's profile picture URL
-  broadcasterType: string,       // 'partner', 'affiliate', or ''
-  createdAt: Date                // When subscriber's account was created
+  profileImageUrl: string        // Subscriber's profile picture URL
 }
 ```
 
@@ -133,8 +131,7 @@ Triggered when someone cheers with bits.
   bits: number,                  // Number of bits cheered
   message: string,               // Message included with the cheer
   isAnonymous: boolean,          // Whether the cheer is anonymous
-  profileImageUrl: string,       // Cheerer's profile picture URL
-  broadcasterType: string        // 'partner', 'affiliate', or ''
+  profileImageUrl: string        // Cheerer's profile picture URL
 }
 ```
 

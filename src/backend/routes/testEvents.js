@@ -10,7 +10,7 @@ function setupTestEventRoutes (app) {
         username: 'teststreamer',
         displayName: 'TestStreamer',
         viewerCount: 42,
-        profileImageUrl: 'https://static-cdn.jtvnw.net/jtv_user_pictures/default_profile_image-300x300.png',
+        profileImageUrl: '/images/default-avatar.png',
         broadcasterType: 'partner',
         description: 'Just a test raid from a partner streamer',
         gameName: 'Just Chatting',
@@ -20,7 +20,7 @@ function setupTestEventRoutes (app) {
       follow: {
         username: 'newfollower',
         displayName: 'NewFollower',
-        profileImageUrl: 'https://static-cdn.jtvnw.net/jtv_user_pictures/default_profile_image-300x300.png',
+        profileImageUrl: '/images/default-avatar.png',
         createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30), // 30 days old
         description: 'A test follower account'
       },
@@ -29,7 +29,7 @@ function setupTestEventRoutes (app) {
         displayName: 'TestSub',
         tier: '1000',
         isGift: false,
-        profileImageUrl: 'https://static-cdn.jtvnw.net/jtv_user_pictures/default_profile_image-300x300.png'
+        profileImageUrl: '/images/default-avatar.png'
       },
       gift: {
         username: 'generousgifter',
@@ -37,7 +37,7 @@ function setupTestEventRoutes (app) {
         amount: 5,
         tier: '1000',
         isAnonymous: false,
-        profileImageUrl: 'https://static-cdn.jtvnw.net/jtv_user_pictures/default_profile_image-300x300.png',
+        profileImageUrl: '/images/default-avatar.png',
         cumulativeAmount: 10
       },
       cheer: {
@@ -46,7 +46,7 @@ function setupTestEventRoutes (app) {
         bits: 100,
         message: 'PogChamp Great stream! Cheer100',
         isAnonymous: false,
-        profileImageUrl: 'https://static-cdn.jtvnw.net/jtv_user_pictures/default_profile_image-300x300.png'
+        profileImageUrl: '/images/default-avatar.png'
       },
       redemption: {
         username: 'redeemer',
@@ -55,7 +55,7 @@ function setupTestEventRoutes (app) {
         rewardCost: 500,
         rewardPrompt: 'Make the streamer drink water',
         userInput: 'Please drink some water!',
-        profileImageUrl: 'https://static-cdn.jtvnw.net/jtv_user_pictures/default_profile_image-300x300.png',
+        profileImageUrl: '/images/default-avatar.png',
         redeemedAt: new Date()
       },
       chat: {
