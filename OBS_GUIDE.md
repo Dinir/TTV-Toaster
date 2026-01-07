@@ -250,5 +250,5 @@ Simply add different browser sources with different URLs to each scene.
 ## Need Help?
 
 - Check the [main README](README.md) for general setup
-- Open issues at [GitHub](https://github.com/yourusername/TTV-Toaster/issues)
+- Open issues at [GitHub](https://github.com/dinir/TTV-Toaster/issues)
 - Review the example templates for inspiration
