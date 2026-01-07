@@ -169,16 +169,20 @@
       if (isMod) badges.push('MOD')
       if (isSubscriber) badges.push('SUB')
       const badgeStr = badges.length > 0 ? `[${badges.join(',')}] ` : ''
-      addEvent('chat', null, `${badgeStr}${displayName}: ${message}`)
+      addEvent('chat', undefined, `${badgeStr}${displayName}: ${message}`)
     })
 
     function addEvent (type, avatarUrl, message) {
       const eventDiv = document.createElement('div')
       eventDiv.className = 'event'
 
-      const avatar = avatarUrl
-        ? `<img src="${avatarUrl}" class="event-avatar" alt="Avatar">`
-        : '<div class="event-avatar" style="background: #9146FF;"></div>'
+      // For chat events (avatarUrl is undefined), skip avatar entirely
+      let avatar = ''
+      if (avatarUrl !== undefined) {
+        avatar = avatarUrl
+          ? `<img src="${avatarUrl}" class="event-avatar" alt="Avatar">`
+          : '<div class="event-avatar" style="background: #9146FF;"></div>'
+      }
 
       eventDiv.innerHTML = `
         ${avatar}
