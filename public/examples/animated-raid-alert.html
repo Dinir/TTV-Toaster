@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animated Raid Alert - TTV Toaster Example</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* Big marquee text */
+    .marquee-big {
+      position: fixed;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      white-space: nowrap;
+      font-size: 8em;
+      font-weight: bold;
+      color: #ff0000;
+      text-shadow: 4px 4px 20px rgba(255, 0, 0, 0.8);
+      opacity: 1;
+      z-index: 10;
+      width: 100%;
+      height: 1.2em;
+      overflow: hidden;
+      position: fixed;
+    }
+
+    .marquee-big-segment {
+      position: absolute;
+      top: 0;
+      white-space: nowrap;
+      color: inherit;
+      font-size: inherit;
+      font-weight: inherit;
+      text-shadow: inherit;
+    }
+
+    /* Small marquee text (top and bottom) */
+    .marquee-small {
+      position: fixed;
+      left: 0;
+      white-space: nowrap;
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #ff0000;
+      text-shadow: 2px 2px 10px rgba(255, 0, 0, 0.8);
+      opacity: 1;
+      z-index: 9;
+      width: 100%;
+      height: 2em;
+      overflow: hidden;
+    }
+
+    .marquee-small.top {
+      top: -2em; /* Start completely outside (height is 2em) */
+    }
+
+    .marquee-small.bottom {
+      bottom: -2em; /* Start completely outside (height is 2em) */
+    }
+
+    .marquee-small.show.top {
+      animation: slideDownToEdge 1s ease-out forwards;
+    }
+
+    .marquee-small.show.bottom {
+      animation: slideUpToEdge 1s ease-out forwards;
+    }
+
+    .marquee-small.hide.top {
+      animation: slideUpOutside 1s ease-in forwards;
+    }
+
+    .marquee-small.hide.bottom {
+      animation: slideDownOutside 1s ease-in forwards;
+    }
+
+    .marquee-segment {
+      position: absolute;
+      top: 0;
+      white-space: nowrap;
+      color: inherit;
+      font-size: inherit;
+      font-weight: inherit;
+      text-shadow: inherit;
+    }
+
+    /* Information rectangle */
+    .info-rect {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 15px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      opacity: 0;
+      z-index: 11;
+    }
+
+    .info-rect.show {
+      animation: rectFadeIn 0.3s ease-out forwards;
+    }
+
+    .info-rect.hide {
+      animation: rectFadeOut 0.5s ease-out forwards;
+    }
+
+    /* Rect sections */
+    .rect-title {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 15px 30px;
+      text-align: center;
+      font-size: 1.2em;
+      font-weight: bold;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .rect-section {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+      padding: 0 30px;
+      color: white;
+    }
+
+    .rect-section.expand {
+      padding: 20px 30px;
+    }
+
+    .profile-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .profile-pic {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .profile-name {
+      font-size: 2em;
+      font-weight: bold;
+      text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .stream-info {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .info-line {
+      font-size: 1.2em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-label {
+      opacity: 0.8;
+      font-weight: normal;
+    }
+
+    .info-value {
+      font-weight: bold;
+    }
+
+    .game-timer-row {
+      display: flex;
+      gap: 20px;
+    }
+
+    .game-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .timer-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      align-items: flex-end;
+    }
+
+    .timer-value {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #FFD700;
+      text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Keyframe animations */
+    @keyframes slideDownToEdge {
+      0% {
+        top: -2em;
+      }
+      100% {
+        top: 0;
+      }
+    }
+
+    @keyframes slideUpToEdge {
+      0% {
+        bottom: -2em;
+      }
+      100% {
+        bottom: 0;
+      }
+    }
+
+    @keyframes slideUpOutside {
+      0% {
+        top: 0;
+      }
+      100% {
+        top: -2em;
+      }
+    }
+
+    @keyframes slideDownOutside {
+      0% {
+        bottom: 0;
+      }
+      100% {
+        bottom: -2em;
+      }
+    }
+
+    @keyframes rectFadeIn {
+      0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    @keyframes rectFadeOut {
+      0% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.8);
+      }
+    }
+  </style>
+</head>
+<body>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/ttv-toaster.js"></script>
+  <script>
+    function calculateStreamDuration(timestamp) {
+      if (!timestamp) return 'Unknown duration';
+
+      const now = Date.now();
+      const diff = now - new Date(timestamp).getTime();
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+      if (hours > 0) {
+        return `${hours}h ${minutes}m`;
+      }
+      return `${minutes}m`;
+    }
+
+    // Alert queue system
+    const alertQueue = [];
+    let isAlertPlaying = false;
+
+    function playNextAlert() {
+      if (isAlertPlaying || alertQueue.length === 0) {
+        return;
+      }
+
+      isAlertPlaying = true;
+      const eventDetail = alertQueue.shift();
+      playRaidAlert(eventDetail);
+    }
+
+    // Raid alert handler
+    document.addEventListener('twitch:raid', (event) => {
+      // Add to queue
+      alertQueue.push(event.detail);
+      playNextAlert();
+    });
+
+    function playRaidAlert(eventDetail) {
+      const { displayName, viewerCount, gameName, profileImageUrl, streamStartTime } = eventDetail;
+
+      // Create big marquee with cycling segments
+      const marqueeBig = document.createElement('div');
+      marqueeBig.className = 'marquee-big';
+      document.body.appendChild(marqueeBig);
+
+      // Create small marquee with cycling segments (top)
+      const marqueeSmallTop = document.createElement('div');
+      marqueeSmallTop.className = 'marquee-small top';
+      document.body.appendChild(marqueeSmallTop);
+
+      // Create small marquee with cycling segments (bottom)
+      const marqueeSmallBottom = document.createElement('div');
+      marqueeSmallBottom.className = 'marquee-small bottom';
+      document.body.appendChild(marqueeSmallBottom);
+
+      // Function to create scrolling segments
+      function createScrollingMarquee(container, isBig = false) {
+        // Use &nbsp; for both big and small text to prevent spacing issues
+        const text = 'RAID ALERT\u00A0'.repeat(5); // \u00A0 is &nbsp;
+        const segments = [];
+        const numSegments = 3;
+        const segmentClass = isBig ? 'marquee-big-segment' : 'marquee-segment';
+
+        // Create segments and measure their actual width
+        for (let i = 0; i < numSegments; i++) {
+          const segment = document.createElement('div');
+          segment.className = segmentClass;
+          segment.textContent = text;
+          segment.style.left = '0px';
+          container.appendChild(segment);
+          segments.push(segment);
+        }
+
+        // Measure segment width and position them without gaps
+        const segmentWidth = segments[0].offsetWidth;
+        segments.forEach((segment, i) => {
+          segment.style.left = `${i * segmentWidth}px`;
+        });
+
+        // Calculate speed: 40% of segment per second
+        // This means 2 "RAID ALERT"s per second (since each segment has 5 repetitions)
+        // Speed = (0.4 * segmentWidth) pixels per second
+        // At 60fps: pixelsPerFrame = (0.4 * segmentWidth) / 60
+        const pixelsPerFrame = (0.4 * segmentWidth) / 60;
+
+        // Animate segments
+        let stopAnimation = false;
+        function animateSegments() {
+          if (stopAnimation) return;
+
+          segments.forEach((segment) => {
+            const currentLeft = parseFloat(segment.style.left);
+            const newLeft = currentLeft - pixelsPerFrame;
+
+            if (newLeft <= -segmentWidth) {
+              // Move to the end when it goes off screen
+              const maxLeft = Math.max(...segments.map(s => parseFloat(s.style.left)));
+              segment.style.left = `${maxLeft + segmentWidth}px`;
+            } else {
+              segment.style.left = `${newLeft}px`;
+            }
+          });
+
+          requestAnimationFrame(animateSegments);
+        }
+
+        animateSegments();
+
+        return () => { stopAnimation = true; };
+      }
+
+      // Start all scrolls immediately
+      let stopBigScroll, stopSmallTopScroll, stopSmallBottomScroll;
+
+      setTimeout(() => {
+        // Start big scroll immediately
+        stopBigScroll = createScrollingMarquee(marqueeBig, true);
+      }, 50);
+
+      // Small marquees slide in when rectangle appears (at 4s)
+      setTimeout(() => {
+        // Start horizontal scrolling for small marquees
+        stopSmallTopScroll = createScrollingMarquee(marqueeSmallTop, false);
+        stopSmallBottomScroll = createScrollingMarquee(marqueeSmallBottom, false);
+
+        // Start slide-in animations (scrolling continues during slide)
+        marqueeSmallTop.classList.add('show');
+        marqueeSmallBottom.classList.add('show');
+      }, 4000);
+
+      // Create info rectangle
+      const infoRect = document.createElement('div');
+      infoRect.className = 'info-rect';
+
+      // Build rectangle content
+      const streamDuration = calculateStreamDuration(streamStartTime);
+
+      infoRect.innerHTML = `
+        <div class="rect-title">Raider Information</div>
+
+        <div class="rect-section profile-section-container">
+          <div class="profile-section">
+            <img src="${profileImageUrl}" class="profile-pic" alt="${displayName}">
+            <div class="profile-name">${displayName}</div>
+          </div>
+        </div>
+
+        <div class="rect-section stream-info-container">
+          <div class="stream-info">
+            <div class="info-line">
+              <span class="info-label">Stream Duration:</span>
+              <span class="info-value">${streamDuration}</span>
+            </div>
+            <div class="info-line">
+              <span class="info-label">Viewers:</span>
+              <span class="info-value">${viewerCount}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="rect-section game-timer-container">
+          <div class="game-timer-row">
+            <div class="game-section">
+              <span class="info-label">Game:</span>
+              <span class="info-value">${gameName || 'Unknown'}</span>
+            </div>
+            <div class="timer-section">
+              <span class="info-label">Closing in:</span>
+              <span class="timer-value" id="countdown-timer">8</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(infoRect);
+
+      // Calculate final centered position based on fully expanded height
+      // Title: ~53px, Profile: ~120px, Stream info: ~120px, Game/timer: ~120px
+      // Total estimated: ~413px
+      const estimatedFinalHeight = 413;
+      const centeredTop = `calc(50% - ${estimatedFinalHeight / 2}px)`;
+      infoRect.style.top = centeredTop;
+
+      // Get section elements
+      const profileSection = infoRect.querySelector('.profile-section-container');
+      const streamInfoSection = infoRect.querySelector('.stream-info-container');
+      const gameTimerSection = infoRect.querySelector('.game-timer-container');
+
+      // Animation timeline
+      const RECT_DISPLAY_DURATION = 30; // 30 seconds
+      const rectStartTime = Date.now() + 4000; // Rectangle starts 4s after big text
+
+      // Big text scrolls for 4 seconds then disappears
+      setTimeout(() => {
+        if (stopBigScroll) stopBigScroll();
+        marqueeBig.remove();
+      }, 4000);
+
+      // Rectangle appears after big text finishes scrolling (4s)
+      setTimeout(() => {
+        infoRect.classList.add('show');
+      }, 4000);
+
+      // 1s after rectangle appears, show profile (4s + 1s = 5s)
+      setTimeout(() => {
+        profileSection.classList.add('expand');
+        profileSection.style.maxHeight = '120px';
+      }, 5000);
+
+      // 2s after rectangle appears, show stream info (4s + 2s = 6s)
+      setTimeout(() => {
+        streamInfoSection.classList.add('expand');
+        streamInfoSection.style.maxHeight = '120px';
+      }, 6000);
+
+      // 3s after rectangle appears, show game and timer (4s + 3s = 7s)
+      setTimeout(() => {
+        gameTimerSection.classList.add('expand');
+        gameTimerSection.style.maxHeight = '120px';
+        // Rectangle stays centered - no need to reposition
+      }, 7000);
+
+      // Countdown timer logic using 2^t formula
+      const timerElement = infoRect.querySelector('#countdown-timer');
+      let timerRunning = true;
+
+      // Update timer display using requestAnimationFrame
+      function updateTimer() {
+        if (!timerRunning) return;
+
+        const elapsed = Date.now() - rectStartTime;
+        const timeLeft = RECT_DISPLAY_DURATION - (elapsed / 1000);
+
+        if (timeLeft >= 0) {
+          // Calculate 2^t and floor it (cut off decimal)
+          // When timeLeft = 0, this shows 2^0 = 1
+          const displayValue = Math.floor(Math.pow(2, timeLeft));
+          timerElement.textContent = displayValue;
+          requestAnimationFrame(updateTimer);
+        } else {
+          timerRunning = false;
+        }
+      }
+
+      updateTimer();
+
+      // After 30 seconds from rectangle appearing, stay at 2^0=1 for 1 second, then hide
+      // Total duration: 4s (marquee) + 30s (rect display) + 1s (stay at 1) = 35s
+      // But we hide at 34s because the timer reaches 0 at 34s (4s + 30s)
+      setTimeout(() => {
+        // Start slide-out animations for small scrolls (don't stop horizontal scrolling)
+        marqueeSmallTop.classList.remove('show');
+        marqueeSmallTop.classList.add('hide');
+        marqueeSmallBottom.classList.remove('show');
+        marqueeSmallBottom.classList.add('hide');
+
+        // Hide rectangle
+        infoRect.classList.remove('show');
+        infoRect.classList.add('hide');
+
+        // Remove elements after animations complete (1s for small scrolls, 0.5s for rect)
+        setTimeout(() => {
+          // Stop scrolling only when removing elements
+          if (stopSmallTopScroll) stopSmallTopScroll();
+          if (stopSmallBottomScroll) stopSmallBottomScroll();
+
+          marqueeSmallTop.remove();
+          marqueeSmallBottom.remove();
+          infoRect.remove();
+          timerRunning = false;
+
+          // Mark alert as complete and play next in queue
+          isAlertPlaying = false;
+          playNextAlert();
+        }, 1000);
+      }, 34000);
+    }
+  </script>
+</body>
+</html>
